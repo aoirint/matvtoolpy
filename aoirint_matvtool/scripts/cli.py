@@ -2,11 +2,11 @@
 import logging
 from pathlib import Path
 
-from api import config
-from api.inputs import ffmpeg_get_input
-from api.slice import ffmpeg_slice
-from api.crop_scale import ffmpeg_crop_scale
-from api.select_audio import ffmpeg_select_audio
+from aoirint_matvtool import config
+from aoirint_matvtool.inputs import ffmpeg_get_input
+from aoirint_matvtool.slice import ffmpeg_slice
+from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
+from aoirint_matvtool.select_audio import ffmpeg_select_audio
 
 
 def command_input(args):

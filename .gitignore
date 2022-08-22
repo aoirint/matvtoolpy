@@ -4,5 +4,7 @@ __pycache__/
 /dist
 /*.spec
 
+*.egg-info/
+
 *.mp4
 *.mkv

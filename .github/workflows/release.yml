@@ -5,24 +5,19 @@ on:
     types:
       - created
 
+env:
+  VERSION: ${{ github.event.release.tag_name != '' && github.event.release.tag_name || '0.0.0' }}
+  PYTHON_VERSION: '3.9.13'
+
 jobs:
-  binary:
+  pypi:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - 
+          -
             os: 'ubuntu-18.04'
-            artifact_name: matvtool
-            asset_name: matvtool-linux-amd64
-          - 
-            os: 'windows-2019'
-            artifact_name: matvtool.exe
-            asset_name: matvtool-windows-amd64.exe
-          - 
-            os: 'macos-11'
-            artifact_name: matvtool
-            asset_name: matvtool-macos-amd64
+            sed: 'sed'
 
     runs-on: ${{ matrix.os }}
 
@@ -32,7 +27,62 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.13'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+            pip3 install wheel
+            pip3 install -r requirements.txt
+
+      - name: Install gsed for macOS
+        if: startsWith(matrix.os, 'macos-')
+        run: |
+          brew install gnu-sed
+
+      - name: Replace Version
+        run: |
+          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+
+      - name: Build Package
+        run: python3 setup.py sdist bdist_wheel
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          -
+            os: 'ubuntu-18.04'
+            artifact_name: matvtool
+            asset_name: matvtool-linux-amd64
+            sed: 'sed'
+          -
+            os: 'windows-2019'
+            artifact_name: matvtool.exe
+            asset_name: matvtool-windows-amd64.exe
+            sed: 'sed'
+          -
+            os: 'macos-11'
+            artifact_name: matvtool
+            asset_name: matvtool-macos-amd64
+            sed: 'gsed'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
       - name: Install Dependencies
@@ -41,9 +91,18 @@ jobs:
           pip3 install pyinstaller
           pip3 install -r requirements.txt
 
+      - name: Install gsed for macOS
+        if: startsWith(matrix.os, 'macos-')
+        run: |
+          brew install gnu-sed
+
+      - name: Replace Version
+        run: |
+          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+
       - name: Build Binary
         run: |
-          pyinstaller --name matvtool --onefile multiaudiotrackvideotoolpy/cli.py
+          pyinstaller --name matvtool --onefile aoirint_matvtool/scripts/cli.py
       
       - name: Upload Binary to Release
         uses: svenstaro/upload-release-action@v2
