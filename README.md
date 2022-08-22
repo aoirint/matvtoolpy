@@ -10,7 +10,7 @@ A command line tool to handle a multi audio track video file.
 
 - <https://ffmpeg.org/download.html>
 
-`matvtool`本体は、以下からダウンロード・インストールしてください。
+`matvtool`本体は、以下からダウンロード・インストールできます。
 
 - バイナリ（Windows, Linux, macOS）
   - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
