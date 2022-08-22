@@ -3,4 +3,4 @@ import logging
 
 FFMPEG_PATH = 'ffmpeg'
 
-logger = logging.getLogger('MultiAudioTrackVideoTool')
+logger = logging.getLogger('matvtool')
