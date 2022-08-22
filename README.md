@@ -30,5 +30,5 @@ matvtool audio -i input.mkv
 ### select_audio: オーディオトラックを選択して新規動画ファイルとして出力
 
 ```shell
-matvtool select_audio -i input.mkv --audio_index 2 3 output.mkv
+matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 ```
