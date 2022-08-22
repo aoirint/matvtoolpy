@@ -5,6 +5,7 @@ from pathlib import Path
 from api import config
 from api.inputs import ffmpeg_get_input
 from api.slice import ffmpeg_slice
+from api.crop_scale import ffmpeg_crop_scale
 from api.select_audio import ffmpeg_select_audio
 
 
@@ -25,6 +26,20 @@ def command_slice(args):
     ss=ss,
     to=to,
     input_path=input_path,
+    output_path=output_path,
+  ))
+
+
+def command_crop_scale(args):
+  input_path = Path(args.input_path)
+  crop = args.crop
+  scale = args.scale
+  output_path = Path(args.output_path)
+
+  print(ffmpeg_crop_scale(
+    input_path=input_path,
+    crop=crop,
+    scale=scale,
     output_path=output_path,
   ))
 
@@ -77,6 +92,13 @@ def main():
   parser_slice.add_argument('-i', '--input_path', type=str, required=True)
   parser_slice.add_argument('output_path', type=str)
   parser_slice.set_defaults(handler=command_slice)
+
+  parser_crop_scale = subparsers.add_parser('crop_scale')
+  parser_crop_scale.add_argument('-i', '--input_path', type=str, required=True)
+  parser_crop_scale.add_argument('--crop', type=str, required=True)
+  parser_crop_scale.add_argument('--scale', type=str, required=True)
+  parser_crop_scale.add_argument('output_path', type=str)
+  parser_crop_scale.set_defaults(handler=command_crop_scale)
 
   parser_audio = subparsers.add_parser('audio')
   parser_audio.add_argument('-i', '--input_path', type=str, required=True)
