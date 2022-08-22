@@ -54,7 +54,7 @@ def ffmpeg_slice(ss: str, to: str, input_path: Path, output_path: Path) -> Ffmpe
     )
 
   return FfmpegSliceResult(
-    success=False,
+    success=True,
     message=None,
     stderr=stderr,
   )
