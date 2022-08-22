@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - 
+            os: 'ubuntu-18.04'
+            artifact_name: matvtool
+            asset_name: matvtool-linux-amd64
+          - 
+            os: 'windows-2019'
+            artifact_name: matvtool.exe
+            asset_name: matvtool-windows-amd64
+          - 
+            os: 'macos-11'
+            artifact_name: matvtool
+            asset_name: matvtool-macos-amd64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9.13'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip3 install wheel
+          pip3 install pyinstaller
+          pip3 install -r requirements.txt
+
+      - name: Build Binary
+        run: |
+          pyinstaller --name matvtool --onefile multiaudiotrackvideotoolpy/cli.py
+      
+      - name: Upload Binary to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          tag: ${{ github.ref }}
