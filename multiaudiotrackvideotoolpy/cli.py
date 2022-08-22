@@ -29,6 +29,24 @@ def command_slice(args):
   ))
 
 
+def command_audio(args):
+  input_path = Path(args.input_path)
+
+  inp = ffmpeg_get_input(
+    input_path=input_path,
+  )
+
+  assert len(inp.streams) != 0
+  stream = inp.streams[0]
+
+  for track in stream.tracks:
+    if track.type == 'Audio':
+      metadata_title = next(filter(lambda metadata: metadata.key.lower() == 'title', track.metadatas), None)
+      title = metadata_title.value if metadata_title else ''
+
+      print(f'Audio Track {track.index}: {title}')
+
+
 def command_select_audio(args):
   input_path = Path(args.input_path)
   audio_indexes = args.audio_index
@@ -59,6 +77,10 @@ def main():
   parser_slice.add_argument('-i', '--input_path', type=str, required=True)
   parser_slice.add_argument('output_path', type=str)
   parser_slice.set_defaults(handler=command_slice)
+
+  parser_audio = subparsers.add_parser('audio')
+  parser_audio.add_argument('-i', '--input_path', type=str, required=True)
+  parser_audio.set_defaults(handler=command_audio)
 
   parser_select_audio = subparsers.add_parser('select_audio')
   parser_select_audio.add_argument('-i', '--input_path', type=str, required=True)
