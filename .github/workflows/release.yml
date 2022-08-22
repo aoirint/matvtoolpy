@@ -18,7 +18,7 @@ jobs:
           - 
             os: 'windows-2019'
             artifact_name: matvtool.exe
-            asset_name: matvtool-windows-amd64
+            asset_name: matvtool-windows-amd64.exe
           - 
             os: 'macos-11'
             artifact_name: matvtool
