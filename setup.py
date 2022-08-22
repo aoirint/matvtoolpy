@@ -6,6 +6,7 @@ from aoirint_matvtool import __VERSION__ as VERSION
 setup(
     name='aoirint_matvtool',
     version=VERSION, # '0.1.0-alpha', # == 0.1.0-alpha0 == 0.1.0a0
+    license='MIT',
 
     packages=find_packages(),
     include_package_data=True,
@@ -29,6 +30,7 @@ setup(
 
     classifiers=[
         'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
