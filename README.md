@@ -11,6 +11,8 @@ OBS Studioの録画機能やGeForce Experienceの録画機能などで作成し�
 
 基本的にFFmpegのラッパーです。別途FFmpegのインストールが必要です。
 
+- <https://ffmpeg.org/download.html>
+
 ## 用例
 
 ### slice: クリップの作成
