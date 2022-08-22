@@ -80,7 +80,7 @@ jobs:
 
       - name: Build Binary
         run: |
-          pyinstaller --name matvtool --onefile multiaudiotrackvideotoolpy/cli.py
+          pyinstaller --name matvtool --onefile aoirint_matvtool/scripts/cli.py
       
       - name: Upload Binary to Release
         uses: svenstaro/upload-release-action@v2
