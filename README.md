@@ -4,14 +4,22 @@ A command line tool to handle a multi audio track video file.
 
 マルチオーディオトラック動画ファイルを取り扱うためのコマンドラインツール
 
-## 用途
-
-OBS Studioの録画機能やGeForce Experienceの録画機能などで作成した、マルチオーディオトラック動画ファイルを、
-マルチオーディオトラックの状態を保ったまま簡易に編集し、後に高度な動画編集ソフトで使う素材として使いやすい形に整えるためのツール。
+## インストール
 
 基本的にFFmpegのラッパーです。別途FFmpegのインストールが必要です。
 
 - <https://ffmpeg.org/download.html>
+
+- バイナリ（Windows, Linux, macOS）
+  - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
+- Pythonパッケージ: `pip3 install aoirint_matvtool`
+  - PyPI: <https://pypi.org/project/aoirint-matvtool/>
+
+
+## 用途
+
+OBS Studioの録画機能やGeForce Experienceの録画機能などで作成した、マルチオーディオトラック動画ファイルを、
+マルチオーディオトラックの状態を保ったまま簡易に編集し、後に高度な動画編集ソフトで使う素材として使いやすい形に整えるためのツール。
 
 ## 用例
 
