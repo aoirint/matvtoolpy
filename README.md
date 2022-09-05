@@ -57,6 +57,9 @@ matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 192
 `-icrop`/`--input_video_crop`オプション、`-refcrop`/`--reference_image_crop`オプションで、入力動画や参照画像の一部を使用した検索ができます。値は`crop_scale`の`--crop`オプションと同様です。
 特定のアイコンが含まれることがわかっているが、フレーム中の他の部分が大きく違うケースの検索に有用です。
 
+`-p`, `--progress`オプションで、処理の進捗状況の出力方法を変更できます。
+値は、`tqdm` 標準エラー出力・インタラクティブシェル用（デフォルト）、`plain` 標準エラー出力・逐次出力、`none` 出力なし、が利用できます。
+
 ```shell
 # reference.pngに一致するフレームを検索
 matvtool find_image -i input.mkv -ref reference.png
