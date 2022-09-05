@@ -115,30 +115,33 @@ def ffmpeg_find_image_generator(
     encoding='utf-8',
   )
 
-  while proc.poll() is None:
-    line = proc.stderr.readline().rstrip()
+  try:
+    while proc.poll() is None:
+      line = proc.stderr.readline().rstrip()
 
-    match = re.match(r'^\[Parsed_blackframe.+?\]\ (frame:.+)$', line)
-    if match: # "frame:810 pblack:99 pts:13516 t:13.516000 type:P last_keyframe:720"
-      result = match.group(1).strip()
+      match = re.match(r'^\[Parsed_blackframe.+?\]\ (frame:.+)$', line)
+      if match: # "frame:810 pblack:99 pts:13516 t:13.516000 type:P last_keyframe:720"
+        result = match.group(1).strip()
 
-      result_dict = {}
-      for key_value in result.split(' '):
-        key, value = key_value.split(':', maxsplit=2)
-        result_dict[key] = value
+        result_dict = {}
+        for key_value in result.split(' '):
+          key, value = key_value.split(':', maxsplit=2)
+          result_dict[key] = value
 
-      output = FfmpegBlackframeOutputLine.parse_obj(result_dict)
-      yield output
+        output = FfmpegBlackframeOutputLine.parse_obj(result_dict)
+        yield output
 
-    match = re.match(r'^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$', line)
-    if match:
-      frame = int(match.group(1))
-      _time = match.group(2).strip()
+      match = re.match(r'^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$', line)
+      if match:
+        frame = int(match.group(1))
+        _time = match.group(2).strip()
 
-      progress = FfmpegProgressLine(
-        frame=frame,
-        time=_time,
-      )
-      yield progress
+        progress = FfmpegProgressLine(
+          frame=frame,
+          time=_time,
+        )
+        yield progress
 
-  proc.wait()
+    proc.wait()
+  finally:
+    proc.kill()
