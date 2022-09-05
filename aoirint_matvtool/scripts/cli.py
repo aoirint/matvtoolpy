@@ -5,6 +5,7 @@ from math import floor
 from pathlib import Path
 import sys
 from tqdm import tqdm
+from pydantic import BaseModel
 
 from aoirint_matvtool import config
 from aoirint_matvtool.inputs import ffmpeg_get_input
@@ -78,9 +79,18 @@ def command_find_image(args):
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
   assert input_video_fps is not None, 'FPS info not found in the input video'
 
+  internal_fps = fps if fps is not None else input_video_fps
+
   pbar = None
   if progress == 'tqdm':
     pbar = tqdm()
+
+  def format_timedelta(td: timedelta) -> str:
+    hours, remainder = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    microseconds = td.microseconds
+
+    return f'{hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}'
 
   try:
     for output in ffmpeg_find_image_generator(
@@ -95,74 +105,58 @@ def command_find_image(args):
       blackframe_threshold=blackframe_threshold,
     ):
       if isinstance(output, FfmpegProgressLine):
-        raw_time = parse_ffmpeg_time_unit_syntax(output.time)
-        raw_timedelta = timedelta(hours=raw_time.hours, minutes=raw_time.minutes, seconds=raw_time.seconds, microseconds=raw_time.microseconds)
+        internal_time = parse_ffmpeg_time_unit_syntax(output.time)
+        internal_timedelta = timedelta(hours=internal_time.hours, minutes=internal_time.minutes, seconds=internal_time.seconds, microseconds=internal_time.microseconds)
 
-        td = raw_timedelta
-        raw_hours, remainder = divmod(td.seconds, 3600)
-        raw_minutes, raw_seconds = divmod(remainder, 60)
-        raw_microseconds = td.microseconds
-
-        raw_frame = output.frame
+        internal_time_string = format_timedelta(internal_timedelta)
 
         # 開始時間(ss)分、検出時刻を補正
-        td = start_timedelta + raw_timedelta
-        hours, remainder = divmod(td.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        microseconds = td.microseconds
+        input_timedelta = start_timedelta + internal_timedelta
+        input_time_string = format_timedelta(input_timedelta)
 
         # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-        raw_frame = output.frame
+        internal_frame = output.frame
         start_time_total_seconds = start_timedelta.total_seconds()
 
-        output_fps = fps if fps is not None else input_video_fps
-
         start_frame = start_time_total_seconds * input_video_fps
-        rescaled_output_frame = raw_frame / output_fps * input_video_fps
+        rescaled_output_frame = internal_frame / internal_fps * input_video_fps
 
-        frame = floor(start_frame + rescaled_output_frame)
+        input_frame = floor(start_frame + rescaled_output_frame)
 
         if progress == 'tqdm':
           pbar.set_postfix({
-            'time': f'{hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}',
-            'frame': f'{frame}',
-            'internal_time': f'{raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}',
-            'internal_frame': f'{raw_frame}',
+            'time': input_time_string,
+            'frame': f'{input_frame}',
+            'internal_time': internal_time_string,
+            'internal_frame': f'{internal_frame}',
           })
           pbar.refresh()
 
         if progress == 'plain':
-          print(f'Progress | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})', file=sys.stderr)
+          print(f'Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})', file=sys.stderr)
 
       if isinstance(output, FfmpegBlackframeOutputLine):
-        raw_timedelta = timedelta(seconds=output.t)
-
-        td = raw_timedelta
-        raw_hours, remainder = divmod(td.seconds, 3600)
-        raw_minutes, raw_seconds = divmod(remainder, 60)
-        raw_microseconds = td.microseconds
+        internal_timedelta = timedelta(seconds=output.t)
+        internal_time_string = format_timedelta(internal_timedelta)
 
         # 開始時間(ss)分、検出時刻を補正
-        td = start_timedelta + raw_timedelta
-        hours, remainder = divmod(td.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        microseconds = td.microseconds
+        input_timedelta = start_timedelta + internal_timedelta
+        input_time_string = format_timedelta(input_timedelta)
 
         # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-        raw_frame = output.frame
+        internal_frame = output.frame
         start_time_total_seconds = start_timedelta.total_seconds()
 
-        output_fps = fps if fps is not None else input_video_fps
-
         start_frame = start_time_total_seconds * input_video_fps
-        rescaled_output_frame = raw_frame / output_fps * input_video_fps
+        rescaled_output_frame = internal_frame / internal_fps * input_video_fps
 
-        frame = floor(start_frame + rescaled_output_frame)
+        input_frame = floor(start_frame + rescaled_output_frame)
 
         if progress == 'tqdm':
           pbar.clear()
 
-        print(f'Output | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+        print(f'Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})')
+
   finally:
     if progress == 'tqdm':
       pbar.close()
