@@ -72,19 +72,26 @@ def command_find_image(args):
   blackframe_threshold = args.blackframe_threshold
   progress = args.progress
 
-  start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
-  start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
-  # end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
-
+  # FPS
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
   assert input_video_fps is not None, 'FPS info not found in the input video'
 
   internal_fps = fps if fps is not None else input_video_fps
 
+  # Time
+  start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
+  start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
+  # end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
+
+  start_time_total_seconds = start_timedelta.total_seconds()
+  start_frame = start_time_total_seconds * input_video_fps
+
+  # tqdm
   pbar = None
   if progress == 'tqdm':
     pbar = tqdm()
 
+  # Common func
   def format_timedelta(td: timedelta) -> str:
     hours, remainder = divmod(td.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -92,6 +99,7 @@ def command_find_image(args):
 
     return f'{hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}'
 
+  # Execute
   try:
     for output in ffmpeg_find_image_generator(
       input_video_ss=ss,
@@ -116,11 +124,7 @@ def command_find_image(args):
 
         # 開始時間(ss)・フレームレート(fps)分、フレームを補正
         internal_frame = output.frame
-        start_time_total_seconds = start_timedelta.total_seconds()
-
-        start_frame = start_time_total_seconds * input_video_fps
         rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-
         input_frame = floor(start_frame + rescaled_output_frame)
 
         if progress == 'tqdm':
@@ -145,11 +149,7 @@ def command_find_image(args):
 
         # 開始時間(ss)・フレームレート(fps)分、フレームを補正
         internal_frame = output.frame
-        start_time_total_seconds = start_timedelta.total_seconds()
-
-        start_frame = start_time_total_seconds * input_video_fps
         rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-
         input_frame = floor(start_frame + rescaled_output_frame)
 
         if progress == 'tqdm':
