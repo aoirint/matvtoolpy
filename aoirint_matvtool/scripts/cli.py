@@ -11,8 +11,8 @@ from aoirint_matvtool.inputs import ffmpeg_get_input
 from aoirint_matvtool.fps import ffmpeg_fps
 from aoirint_matvtool.slice import ffmpeg_slice
 from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
-from aoirint_matvtool.select_audio import ffmpeg_select_audio
 from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
+from aoirint_matvtool.select_audio import ffmpeg_select_audio
 from aoirint_matvtool.util import (
   parse_ffmpeg_time_unit_syntax,
 )
@@ -55,36 +55,6 @@ def command_crop_scale(args):
     input_path=input_path,
     crop=crop,
     scale=scale,
-    output_path=output_path,
-  ))
-
-
-def command_audio(args):
-  input_path = Path(args.input_path)
-
-  inp = ffmpeg_get_input(
-    input_path=input_path,
-  )
-
-  assert len(inp.streams) != 0
-  stream = inp.streams[0]
-
-  for track in stream.tracks:
-    if track.type == 'Audio':
-      metadata_title = next(filter(lambda metadata: metadata.key.lower() == 'title', track.metadatas), None)
-      title = metadata_title.value if metadata_title else ''
-
-      print(f'Audio Track {track.index}: {title}')
-
-
-def command_select_audio(args):
-  input_path = Path(args.input_path)
-  audio_indexes = args.audio_index
-  output_path = Path(args.output_path)
-
-  print(ffmpeg_select_audio(
-    input_path=input_path,
-    audio_indexes=audio_indexes,
     output_path=output_path,
   ))
 
@@ -197,6 +167,37 @@ def command_find_image(args):
     if progress == 'tqdm':
       pbar.close()
 
+
+def command_audio(args):
+  input_path = Path(args.input_path)
+
+  inp = ffmpeg_get_input(
+    input_path=input_path,
+  )
+
+  assert len(inp.streams) != 0
+  stream = inp.streams[0]
+
+  for track in stream.tracks:
+    if track.type == 'Audio':
+      metadata_title = next(filter(lambda metadata: metadata.key.lower() == 'title', track.metadatas), None)
+      title = metadata_title.value if metadata_title else ''
+
+      print(f'Audio Track {track.index}: {title}')
+
+
+def command_select_audio(args):
+  input_path = Path(args.input_path)
+  audio_indexes = args.audio_index
+  output_path = Path(args.output_path)
+
+  print(ffmpeg_select_audio(
+    input_path=input_path,
+    audio_indexes=audio_indexes,
+    output_path=output_path,
+  ))
+
+
 def main():
   import argparse
   parser = argparse.ArgumentParser()
@@ -227,16 +228,6 @@ def main():
   parser_crop_scale.add_argument('output_path', type=str)
   parser_crop_scale.set_defaults(handler=command_crop_scale)
 
-  parser_audio = subparsers.add_parser('audio')
-  parser_audio.add_argument('-i', '--input_path', type=str, required=True)
-  parser_audio.set_defaults(handler=command_audio)
-
-  parser_select_audio = subparsers.add_parser('select_audio')
-  parser_select_audio.add_argument('-i', '--input_path', type=str, required=True)
-  parser_select_audio.add_argument('--audio_index', type=int, nargs='+', required=True)
-  parser_select_audio.add_argument('output_path', type=str)
-  parser_select_audio.set_defaults(handler=command_select_audio)
-
   parser_find_image = subparsers.add_parser('find_image')
   parser_find_image.add_argument('-ss', type=str, required=False)
   parser_find_image.add_argument('-to', type=str, required=False)
@@ -249,6 +240,16 @@ def main():
   parser_find_image.add_argument('-bt', '--blackframe_threshold', type=int, default=32)
   parser_find_image.add_argument('-p', '--progress', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_find_image.set_defaults(handler=command_find_image)
+
+  parser_audio = subparsers.add_parser('audio')
+  parser_audio.add_argument('-i', '--input_path', type=str, required=True)
+  parser_audio.set_defaults(handler=command_audio)
+
+  parser_select_audio = subparsers.add_parser('select_audio')
+  parser_select_audio.add_argument('-i', '--input_path', type=str, required=True)
+  parser_select_audio.add_argument('--audio_index', type=int, nargs='+', required=True)
+  parser_select_audio.add_argument('output_path', type=str)
+  parser_select_audio.set_defaults(handler=command_select_audio)
 
   args = parser.parse_args()
 
