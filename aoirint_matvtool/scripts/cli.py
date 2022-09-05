@@ -4,6 +4,7 @@ import logging
 from math import floor
 from pathlib import Path
 import sys
+from typing import Optional
 from tqdm import tqdm
 from pydantic import BaseModel
 
@@ -70,6 +71,7 @@ def command_find_image(args):
   fps = args.fps
   blackframe_amount = args.blackframe_amount
   blackframe_threshold = args.blackframe_threshold
+  output_interval = args.output_interval
   progress = args.progress
 
   # FPS
@@ -98,6 +100,8 @@ def command_find_image(args):
     microseconds = td.microseconds
 
     return f'{hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}'
+
+  prev_input_timedelta = timedelta(seconds=-output_interval)
 
   # Execute
   try:
@@ -147,15 +151,18 @@ def command_find_image(args):
         input_timedelta = start_timedelta + internal_timedelta
         input_time_string = format_timedelta(input_timedelta)
 
-        # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-        internal_frame = output.frame
-        rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-        input_frame = floor(start_frame + rescaled_output_frame)
+        if timedelta(seconds=output_interval) <= input_timedelta - prev_input_timedelta:
+          # 開始時間(ss)・フレームレート(fps)分、フレームを補正
+          internal_frame = output.frame
+          rescaled_output_frame = internal_frame / internal_fps * input_video_fps
+          input_frame = floor(start_frame + rescaled_output_frame)
 
-        if progress == 'tqdm':
-          pbar.clear()
+          if progress == 'tqdm':
+            pbar.clear()
 
-        print(f'Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})')
+          print(f'Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})')
+
+          prev_input_timedelta = input_timedelta
 
   finally:
     if progress == 'tqdm':
@@ -232,6 +239,7 @@ def main():
   parser_find_image.add_argument('--fps', type=int, required=False)
   parser_find_image.add_argument('-ba', '--blackframe_amount', type=int, default=98)
   parser_find_image.add_argument('-bt', '--blackframe_threshold', type=int, default=32)
+  parser_find_image.add_argument('-it', '--output_interval', type=float, default=0)
   parser_find_image.add_argument('-p', '--progress', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_find_image.set_defaults(handler=command_find_image)
 
