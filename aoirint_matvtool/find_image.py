@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import Generator, Optional
+from typing import Generator, Optional, Union
 from pydantic import BaseModel
 
 from . import config
@@ -19,6 +19,9 @@ class FfmpegBlackframeOutputLine(BaseModel):
   type: str
   last_keyframe: int
 
+class FfmpegProgressLine(BaseModel):
+  frame: int
+  time: str
 
 def ffmpeg_find_image_generator(
   input_video_ss: Optional[str],
@@ -30,7 +33,7 @@ def ffmpeg_find_image_generator(
   fps: Optional[int],
   blackframe_amount: int = 98,
   blackframe_threshold: int = 32,
-) -> Generator[FfmpegFindImageResult, None, None]:
+) -> Generator[Union[FfmpegBlackframeOutputLine, FfmpegProgressLine], None, None]:
   # Create the input video filter_complex string
   input_video_filter_fps = f'fps={fps}' if fps is not None else None
   input_video_filter_crop = f'crop={input_video_crop}' if input_video_crop is not None else None
@@ -105,7 +108,12 @@ def ffmpeg_find_image_generator(
     'null',
     '-',
   ]
-  proc = subprocess.Popen(command, stderr=subprocess.PIPE, encoding='utf-8')
+  proc = subprocess.Popen(
+    command,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.PIPE,
+    encoding='utf-8',
+  )
 
   while proc.poll() is None:
     line = proc.stderr.readline().rstrip()
@@ -121,5 +129,16 @@ def ffmpeg_find_image_generator(
 
       output = FfmpegBlackframeOutputLine.parse_obj(result_dict)
       yield output
+
+    match = re.match(r'^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$', line)
+    if match:
+      frame = int(match.group(1))
+      _time = match.group(2).strip()
+
+      progress = FfmpegProgressLine(
+        frame=frame,
+        time=_time,
+      )
+      yield progress
 
   proc.wait()

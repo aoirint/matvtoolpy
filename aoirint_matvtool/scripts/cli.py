@@ -10,7 +10,7 @@ from aoirint_matvtool.fps import ffmpeg_fps
 from aoirint_matvtool.slice import ffmpeg_slice
 from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
 from aoirint_matvtool.select_audio import ffmpeg_select_audio
-from aoirint_matvtool.find_image import ffmpeg_find_image_generator
+from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
 from aoirint_matvtool.util import (
   parse_ffmpeg_time_unit_syntax,
 )
@@ -99,6 +99,7 @@ def command_find_image(args):
   blackframe_threshold = args.blackframe_threshold
 
   start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
+  start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
   # end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
 
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
@@ -115,33 +116,62 @@ def command_find_image(args):
     blackframe_amount=blackframe_amount,
     blackframe_threshold=blackframe_threshold,
   ):
-    raw_timedelta = timedelta(seconds=output.t)
+    if isinstance(output, FfmpegProgressLine):
+      raw_time = parse_ffmpeg_time_unit_syntax(output.time)
+      raw_timedelta = timedelta(hours=raw_time.hours, minutes=raw_time.minutes, seconds=raw_time.seconds, microseconds=raw_time.microseconds)
 
-    td = raw_timedelta
-    raw_hours, remainder = divmod(td.seconds, 3600)
-    raw_minutes, raw_seconds = divmod(remainder, 60)
-    raw_microseconds = td.microseconds
+      td = raw_timedelta
+      raw_hours, remainder = divmod(td.seconds, 3600)
+      raw_minutes, raw_seconds = divmod(remainder, 60)
+      raw_microseconds = td.microseconds
 
-    # 開始時間(ss)分、検出時刻を補正
-    start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
+      raw_frame = output.frame
 
-    td = start_timedelta + raw_timedelta
-    hours, remainder = divmod(td.seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    microseconds = td.microseconds
+      # 開始時間(ss)分、検出時刻を補正
+      td = start_timedelta + raw_timedelta
+      hours, remainder = divmod(td.seconds, 3600)
+      minutes, seconds = divmod(remainder, 60)
+      microseconds = td.microseconds
 
-    # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-    raw_frame = output.frame
-    start_time_total_seconds = start_timedelta.total_seconds()
+      # 開始時間(ss)・フレームレート(fps)分、フレームを補正
+      raw_frame = output.frame
+      start_time_total_seconds = start_timedelta.total_seconds()
 
-    output_fps = fps if fps is not None else input_video_fps
+      output_fps = fps if fps is not None else input_video_fps
 
-    start_frame = start_time_total_seconds * input_video_fps
-    rescaled_output_frame = raw_frame / output_fps * input_video_fps
+      start_frame = start_time_total_seconds * input_video_fps
+      rescaled_output_frame = raw_frame / output_fps * input_video_fps
 
-    frame = floor(start_frame + rescaled_output_frame)
+      frame = floor(start_frame + rescaled_output_frame)
 
-    print(f'Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+      print(f'Progress | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+
+    if isinstance(output, FfmpegBlackframeOutputLine):
+      raw_timedelta = timedelta(seconds=output.t)
+
+      td = raw_timedelta
+      raw_hours, remainder = divmod(td.seconds, 3600)
+      raw_minutes, raw_seconds = divmod(remainder, 60)
+      raw_microseconds = td.microseconds
+
+      # 開始時間(ss)分、検出時刻を補正
+      td = start_timedelta + raw_timedelta
+      hours, remainder = divmod(td.seconds, 3600)
+      minutes, seconds = divmod(remainder, 60)
+      microseconds = td.microseconds
+
+      # 開始時間(ss)・フレームレート(fps)分、フレームを補正
+      raw_frame = output.frame
+      start_time_total_seconds = start_timedelta.total_seconds()
+
+      output_fps = fps if fps is not None else input_video_fps
+
+      start_frame = start_time_total_seconds * input_video_fps
+      rescaled_output_frame = raw_frame / output_fps * input_video_fps
+
+      frame = floor(start_frame + rescaled_output_frame)
+
+      print(f'Output | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
 
 
 def main():
