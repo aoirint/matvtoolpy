@@ -60,6 +60,8 @@ matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 192
 `-p`, `--progress`オプションで、処理の進捗状況の出力方法を変更できます。
 値は、`tqdm` 標準エラー出力・インタラクティブシェル用（デフォルト）、`plain` 標準エラー出力・逐次出力、`none` 出力なし、が利用できます。
 
+処理に時間のかかる長い動画を入力するときは、`tee`コマンドなどで出力を永続化したり、`tmux`コマンドなどでバックグラウンド処理したりすると便利です。
+
 ```shell
 # reference.pngに一致するフレームを検索
 matvtool find_image -i input.mkv -ref reference.png
