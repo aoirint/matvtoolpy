@@ -3,6 +3,8 @@ from datetime import timedelta
 import logging
 from math import floor
 from pathlib import Path
+import sys
+from tqdm import tqdm
 
 from aoirint_matvtool import config
 from aoirint_matvtool.inputs import ffmpeg_get_input
@@ -97,6 +99,7 @@ def command_find_image(args):
   fps = args.fps
   blackframe_amount = args.blackframe_amount
   blackframe_threshold = args.blackframe_threshold
+  progress = args.progress
 
   start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
   start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
@@ -105,74 +108,94 @@ def command_find_image(args):
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
   assert input_video_fps is not None, 'FPS info not found in the input video'
 
-  for output in ffmpeg_find_image_generator(
-    input_video_ss=ss,
-    input_video_to=to,
-    input_video_path=input_video_path,
-    input_video_crop=input_video_crop,
-    reference_image_path=reference_image_path,
-    reference_image_crop=reference_image_crop,
-    fps=fps,
-    blackframe_amount=blackframe_amount,
-    blackframe_threshold=blackframe_threshold,
-  ):
-    if isinstance(output, FfmpegProgressLine):
-      raw_time = parse_ffmpeg_time_unit_syntax(output.time)
-      raw_timedelta = timedelta(hours=raw_time.hours, minutes=raw_time.minutes, seconds=raw_time.seconds, microseconds=raw_time.microseconds)
+  pbar = None
+  if progress == 'tqdm':
+    pbar = tqdm()
 
-      td = raw_timedelta
-      raw_hours, remainder = divmod(td.seconds, 3600)
-      raw_minutes, raw_seconds = divmod(remainder, 60)
-      raw_microseconds = td.microseconds
+  try:
+    for output in ffmpeg_find_image_generator(
+      input_video_ss=ss,
+      input_video_to=to,
+      input_video_path=input_video_path,
+      input_video_crop=input_video_crop,
+      reference_image_path=reference_image_path,
+      reference_image_crop=reference_image_crop,
+      fps=fps,
+      blackframe_amount=blackframe_amount,
+      blackframe_threshold=blackframe_threshold,
+    ):
+      if isinstance(output, FfmpegProgressLine):
+        raw_time = parse_ffmpeg_time_unit_syntax(output.time)
+        raw_timedelta = timedelta(hours=raw_time.hours, minutes=raw_time.minutes, seconds=raw_time.seconds, microseconds=raw_time.microseconds)
 
-      raw_frame = output.frame
+        td = raw_timedelta
+        raw_hours, remainder = divmod(td.seconds, 3600)
+        raw_minutes, raw_seconds = divmod(remainder, 60)
+        raw_microseconds = td.microseconds
 
-      # 開始時間(ss)分、検出時刻を補正
-      td = start_timedelta + raw_timedelta
-      hours, remainder = divmod(td.seconds, 3600)
-      minutes, seconds = divmod(remainder, 60)
-      microseconds = td.microseconds
+        raw_frame = output.frame
 
-      # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-      raw_frame = output.frame
-      start_time_total_seconds = start_timedelta.total_seconds()
+        # 開始時間(ss)分、検出時刻を補正
+        td = start_timedelta + raw_timedelta
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        microseconds = td.microseconds
 
-      output_fps = fps if fps is not None else input_video_fps
+        # 開始時間(ss)・フレームレート(fps)分、フレームを補正
+        raw_frame = output.frame
+        start_time_total_seconds = start_timedelta.total_seconds()
 
-      start_frame = start_time_total_seconds * input_video_fps
-      rescaled_output_frame = raw_frame / output_fps * input_video_fps
+        output_fps = fps if fps is not None else input_video_fps
 
-      frame = floor(start_frame + rescaled_output_frame)
+        start_frame = start_time_total_seconds * input_video_fps
+        rescaled_output_frame = raw_frame / output_fps * input_video_fps
 
-      print(f'Progress | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+        frame = floor(start_frame + rescaled_output_frame)
 
-    if isinstance(output, FfmpegBlackframeOutputLine):
-      raw_timedelta = timedelta(seconds=output.t)
+        if progress == 'tqdm':
+          pbar.set_postfix({
+            'time': f'{hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}',
+            'frame': f'{frame}',
+            'internal_time': f'{raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}',
+            'internal_frame': f'{raw_frame}',
+          })
+          pbar.refresh()
 
-      td = raw_timedelta
-      raw_hours, remainder = divmod(td.seconds, 3600)
-      raw_minutes, raw_seconds = divmod(remainder, 60)
-      raw_microseconds = td.microseconds
+        if progress == 'plain':
+          print(f'Progress | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})', file=sys.stderr)
 
-      # 開始時間(ss)分、検出時刻を補正
-      td = start_timedelta + raw_timedelta
-      hours, remainder = divmod(td.seconds, 3600)
-      minutes, seconds = divmod(remainder, 60)
-      microseconds = td.microseconds
+      if isinstance(output, FfmpegBlackframeOutputLine):
+        raw_timedelta = timedelta(seconds=output.t)
 
-      # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-      raw_frame = output.frame
-      start_time_total_seconds = start_timedelta.total_seconds()
+        td = raw_timedelta
+        raw_hours, remainder = divmod(td.seconds, 3600)
+        raw_minutes, raw_seconds = divmod(remainder, 60)
+        raw_microseconds = td.microseconds
 
-      output_fps = fps if fps is not None else input_video_fps
+        # 開始時間(ss)分、検出時刻を補正
+        td = start_timedelta + raw_timedelta
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        microseconds = td.microseconds
 
-      start_frame = start_time_total_seconds * input_video_fps
-      rescaled_output_frame = raw_frame / output_fps * input_video_fps
+        # 開始時間(ss)・フレームレート(fps)分、フレームを補正
+        raw_frame = output.frame
+        start_time_total_seconds = start_timedelta.total_seconds()
 
-      frame = floor(start_frame + rescaled_output_frame)
+        output_fps = fps if fps is not None else input_video_fps
 
-      print(f'Output | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+        start_frame = start_time_total_seconds * input_video_fps
+        rescaled_output_frame = raw_frame / output_fps * input_video_fps
 
+        frame = floor(start_frame + rescaled_output_frame)
+
+        if progress == 'tqdm':
+          pbar.clear()
+
+        print(f'Output | Time {hours:02d}:{minutes:02d}:{seconds:02d}.{microseconds:06d}, frame {frame} (Internal time {raw_hours:02d}:{raw_minutes:02d}:{raw_seconds:02d}.{raw_microseconds:06d}, frame {raw_frame})')
+  finally:
+    if progress == 'tqdm':
+      pbar.close()
 
 def main():
   import argparse
@@ -224,6 +247,7 @@ def main():
   parser_find_image.add_argument('--fps', type=int, required=False)
   parser_find_image.add_argument('-ba', '--blackframe_amount', type=int, default=98)
   parser_find_image.add_argument('-bt', '--blackframe_threshold', type=int, default=32)
+  parser_find_image.add_argument('-p', '--progress', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_find_image.set_defaults(handler=command_find_image)
 
   args = parser.parse_args()
