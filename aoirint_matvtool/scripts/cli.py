@@ -87,6 +87,7 @@ def command_find_image(args):
 
   start_time_total_seconds = start_timedelta.total_seconds()
   start_frame = start_time_total_seconds * input_video_fps
+  print(start_time_total_seconds, start_frame)
 
   # tqdm
   pbar = None
