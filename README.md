@@ -76,7 +76,7 @@ matvtool find_image -i input.mkv -ref reference.png --fps 10
 # 左上1600x900を使用してreference.pngに一致するフレームを検索
 matvtool find_image -i input.mkv -icrop w=1600:h=900:x=0:y=0 -ref reference.png -refcrop w=1600:h=900:x=0:y=0
 
-# 最小10秒間隔で同上
+# 最小10秒間隔で同上、10 FPS、出力永続化
 PYTHONUNBUFFERED=1 matvtool find_image -i input.mkv -icrop w=1600:h=900:x=0:y=0 -ref reference.png -refcrop w=1600:h=900:x=0:y=0 --fps 10 -it 10 | tee chapters.txt
 ```
 
