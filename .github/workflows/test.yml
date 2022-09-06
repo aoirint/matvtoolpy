@@ -70,5 +70,9 @@ jobs:
             pip3 install wheel
             pip3 install -r requirements-test.txt
 
+      - name: Install FFmpeg
+        run: |
+            sudo apt-get install -y ffmpeg
+
       - name: Run mypy
         run: pytest tests
