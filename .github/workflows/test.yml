@@ -9,7 +9,6 @@ on:
   pull_request:
 
 env:
-  VERSION: ${{ github.event.release.tag_name != '' && github.event.release.tag_name || '0.0.0' }}
   PYTHON_VERSION: '3.9.13'
 
 jobs:
@@ -18,9 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          -
-            os: 'ubuntu-20.04'
-            sed: 'sed'
+          - os: 'ubuntu-20.04'
 
     runs-on: ${{ matrix.os }}
 
@@ -37,15 +34,6 @@ jobs:
         run: |
             pip3 install wheel
             pip3 install -r requirements-test.txt
-
-      - name: Install gsed for macOS
-        if: startsWith(matrix.os, 'macos-')
-        run: |
-          brew install gnu-sed
-
-      - name: Replace Version
-        run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
 
       - name: Run mypy
         run: mypy aoirint_matvtool
