@@ -227,7 +227,8 @@ def main():
   import argparse
   parser = argparse.ArgumentParser()
   parser.add_argument('-l', '--log_level', type=int, default=logging.INFO)
-  parser.add_argument('-f', '--ffmpeg_path', type=str, default=config.FFMPEG_PATH)
+  parser.add_argument('--ffmpeg_path', type=str, default=config.FFMPEG_PATH)
+  parser.add_argument('--ffprobe_path', type=str, default=config.FFPROBE_PATH)
 
   subparsers = parser.add_subparsers()
 
@@ -290,6 +291,7 @@ def main():
   )
 
   config.FFMPEG_PATH = args.ffmpeg_path
+  config.FFPROBE_PATH = args.ffprobe_path
 
   if hasattr(args, 'handler'):
     args.handler(args)
