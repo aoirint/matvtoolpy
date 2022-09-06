@@ -8,6 +8,7 @@ from unittest import TestCase
 from tempfile import NamedTemporaryFile
 import numpy as np
 import cv2 # type: ignore
+
 from aoirint_matvtool.fps import ffmpeg_fps
 
 
@@ -40,6 +41,7 @@ def temporary_video_path() -> Generator[Path, None, None]:
           fontFace=font_face,
           fontScale=font_scale,
           color=(255, 255, 255), # BGR
+          thickness=1,
         )
 
         video.write(frame)
