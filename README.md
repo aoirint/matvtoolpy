@@ -45,6 +45,41 @@ matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 o
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 1920:1080 output.mkv
 ```
 
+### find_image: 画像の出現時間・出現フレームを検索
+
+動画のスナップショットやクロップ画像を使用して、出現時間・出現フレームを検索します。
+特定シーンの頭出しやチャプターを作成する用途を想定しています。
+確実・正確に検出できるとは限りません。
+出力は、VSCodeのマルチカーソル機能や`seq`コマンドなどを使って手動処理することを想定しています（試合1～試合10までの連番文字列生成：`seq -f "試合%g" 1 10`）。
+
+`slice`と同様のオプションで検索範囲の時間を指定できます。`--fps`オプションで比較処理におけるフレームの読み飛ばしができます（コーデックにおけるフレーム間予測の関係で、全フレームのデコードは発生すると思われるため、デコード処理時間が支配的な場合はあまり意味がないと思われます）。
+出力は、内部処理における時間・フレームと、入力動画における時間・フレームが併記されます。
+
+`-icrop`/`--input_video_crop`オプション、`-refcrop`/`--reference_image_crop`オプションで、入力動画や参照画像の一部を使用した検索ができます。値は`crop_scale`の`--crop`オプションと同様です。
+特定のアイコンが含まれることがわかっているが、フレーム中の他の部分が大きく違うケースの検索に有用です。
+
+`-it`/`--output_interval`オプションで、連続出現時の出力を抑制できます。手動処理を減らすためのオプションです。
+例えば、`-it 10`を指定すると、前回出現してから10秒間のフレームで再び出現を検出しても、ログ出力しません（[YouTubeのチャプター機能](https://support.google.com/youtube/answer/9884579)では、最小チャプター間隔は10秒）。
+
+`-p`, `--progress`オプションで、処理の進捗状況の出力方法を変更できます。
+値は、`tqdm` 標準エラー出力・インタラクティブシェル用（デフォルト）、`plain` 標準エラー出力・逐次出力、`none` 出力なし、が利用できます。
+
+処理に時間のかかる長い動画を入力するときは、`tee`コマンドなどで出力を永続化したり、`tmux`コマンドなどでバックグラウンド処理したりすると便利です。うまく出力が表示されないときは、一時的に環境変数`PYTHONUNBUFFERED=1`を設定すると改善するかもしれません。
+
+```shell
+# reference.pngに一致するフレームを検索
+matvtool find_image -i input.mkv -ref reference.png
+
+# 10 FPSでreference.pngに一致するフレームを検索（フレームの読み飛ばしによる高速化を意図）
+matvtool find_image -i input.mkv -ref reference.png --fps 10
+
+# 左上1600x900を使用してreference.pngに一致するフレームを検索
+matvtool find_image -i input.mkv -icrop w=1600:h=900:x=0:y=0 -ref reference.png -refcrop w=1600:h=900:x=0:y=0
+
+# 最小10秒間隔で同上、10 FPS、出力永続化
+PYTHONUNBUFFERED=1 matvtool find_image -i input.mkv -icrop w=1600:h=900:x=0:y=0 -ref reference.png -refcrop w=1600:h=900:x=0:y=0 --fps 10 -it 10 | tee chapters.txt
+```
+
 ### audio: オーディオトラック一覧の確認
 
 ```shell
