@@ -1,7 +1,21 @@
 from datetime import timedelta
 from math import log10
 import re
+from typing import Iterable, Optional, TypeVar
 from pydantic import BaseModel
+
+
+T = TypeVar('T')
+def exclude_none(iterable: Iterable[Optional[T]]) -> Iterable[T]:
+  """
+    Type-safe exclusion function for None
+  """
+  for item in iterable:
+    if item is None:
+      continue
+
+    yield item
+
 
 class FfmpegTimeUnitSyntax(BaseModel):
   hours: int
