@@ -91,9 +91,23 @@ def command_find_image(args):
   internal_fps = fps if fps is not None else input_video_fps
 
   # Time
-  start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
-  start_timedelta = timedelta(hours=start_time.hours, minutes=start_time.minutes, seconds=start_time.seconds, microseconds=start_time.microseconds) if start_time is not None else timedelta(seconds=0)
-  # end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
+  raw_start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
+  raw_start_timedelta = timedelta(hours=raw_start_time.hours, minutes=raw_start_time.minutes, seconds=raw_start_time.seconds, microseconds=raw_start_time.microseconds) if raw_start_time is not None else timedelta(seconds=0)
+  # raw_end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
+
+  # キーフレーム情報をもとにstart_timedeltaを補正
+  start_timedelta = timedelta(seconds=0)
+  for output in ffmpeg_key_frames(
+    input_path=input_video_path,
+  ):
+    if isinstance(output, FfmpegKeyFrameOutputLine):
+      next_key_frame_timedelta = timedelta(seconds=output.time)
+
+      # raw_start_timedeltaより前のキーフレームを選択（-ssオプションの挙動）
+      if raw_start_timedelta <= next_key_frame_timedelta:
+        break
+
+      start_timedelta = next_key_frame_timedelta
 
   start_time_total_seconds = start_timedelta.total_seconds()
   start_frame = start_time_total_seconds * input_video_fps
