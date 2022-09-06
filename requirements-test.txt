@@ -14,6 +14,8 @@ tomli==2.0.1
     # via mypy
 tqdm==4.64.1
     # via -r requirements.in
+types-tqdm==4.64.6
+    # via -r requirements-test.in
 typing-extensions==4.3.0
     # via
     #   mypy
