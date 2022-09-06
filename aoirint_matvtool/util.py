@@ -1,4 +1,5 @@
 from datetime import timedelta
+from math import log10
 import re
 from pydantic import BaseModel
 
@@ -10,6 +11,18 @@ class FfmpegTimeUnitSyntax(BaseModel):
 
   def to_timedelta(self) -> timedelta:
     return timedelta(hours=self.hours, minutes=self.minutes, seconds=self.seconds, microseconds=self.microseconds)
+
+
+def integer_part_and_decimal_part_to_float(integer_part: int, decimal_part: int) -> float:
+  ret = 0.0
+  ret += integer_part
+
+  decimal_part_num_digits = log10(decimal_part) if decimal_part != 0 else 0 # 桁数
+  decimal_part_scale = 10 ** (-decimal_part_num_digits) # 桁補正係数
+
+  ret += decimal_part * decimal_part_scale
+
+  return ret
 
 
 def parse_ffmpeg_time_unit_syntax(string: str) -> FfmpegTimeUnitSyntax:
@@ -27,11 +40,14 @@ def parse_ffmpeg_time_unit_syntax(string: str) -> FfmpegTimeUnitSyntax:
       microseconds=microseconds,
     )
 
-  match = re.match(r'^(\d+)$', string) # SECONDS
+  match = re.match(r'^(\d+)(\.\d+)?$', string) # SECONDS
   if match:
-    time_seconds = match.group(3)
+    time_seconds_integer_part = int(match.group(1))
+    time_seconds_decimal_part = int(match.group(2)) if match.group(2) is None else 0
 
-    td = timedelta(time_seconds)
+    time_seconds = integer_part_and_decimal_part_to_float(integer_part=time_seconds_integer_part, decimal_part=time_seconds_decimal_part)
+
+    td = timedelta(seconds=time_seconds)
     hours, remainder = divmod(td.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     microseconds = td.microseconds
