@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from aoirint_matvtool import config
 from aoirint_matvtool.inputs import ffmpeg_get_input
 from aoirint_matvtool.fps import ffmpeg_fps
+from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
 from aoirint_matvtool.slice import ffmpeg_slice
 from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
 from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
@@ -32,6 +33,15 @@ def command_fps(args):
   print(ffmpeg_fps(
     input_path=input_path,
   ).fps)
+
+def command_key_frames(args):
+  input_path = Path(args.input_path)
+
+  for output in ffmpeg_key_frames(
+    input_path=input_path,
+  ):
+    if isinstance(output, FfmpegKeyFrameOutputLine):
+      print(f'{output.time:.06f}')
 
 def command_slice(args):
   ss = args.ss
@@ -214,6 +224,10 @@ def main():
   parser_fps = subparsers.add_parser('fps')
   parser_fps.add_argument('-i', '--input_path', type=str, required=True)
   parser_fps.set_defaults(handler=command_fps)
+
+  parser_key_frames = subparsers.add_parser('key_frames')
+  parser_key_frames.add_argument('-i', '--input_path', type=str, required=True)
+  parser_key_frames.set_defaults(handler=command_key_frames)
 
   parser_slice = subparsers.add_parser('slice')
   parser_slice.add_argument('-ss', type=str, required=True)
