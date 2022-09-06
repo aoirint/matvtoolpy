@@ -1,19 +1,20 @@
 import sys
 from pathlib import Path
+from typing import Generator
 sys.path.append(str(Path(__file__).parent.parent))
 
 import contextlib
 from unittest import TestCase
 from tempfile import NamedTemporaryFile
 import numpy as np
-import cv2
+import cv2 # type: ignore
 from aoirint_matvtool.fps import ffmpeg_fps
 
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 @contextlib.contextmanager
-def temporary_video_path() -> Path:
+def temporary_video_path() -> Generator[Path, None, None]:
   with NamedTemporaryFile(suffix='.mp4') as fp:
     width = 640
     height = 360
