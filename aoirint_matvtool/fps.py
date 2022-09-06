@@ -1,10 +1,10 @@
-from math import log10
 from pathlib import Path
 import re
 from typing import Optional
 from pydantic import BaseModel
 
 from .inputs import ffmpeg_get_input
+from .util import integer_part_and_decimal_part_to_float
 
 class FfmpegFpsResult(BaseModel):
   success: bool
@@ -19,13 +19,10 @@ def ffmpeg_fps(input_path: Path) -> FfmpegFpsResult:
   match = re.search(r'(\d+)(\.\d+)?\ fps', input_video_track_text)
 
   if match:
-    input_video_fps = int(match.group(1))
-    input_video_fps_sub = int(match.group(2)[1:]) if match.group(2) is not None else 0 # maybe None
+    input_video_fps_integer_part = int(match.group(1))
+    input_video_fps_decimal_part = int(match.group(2)[1:]) if match.group(2) is not None else 0 # maybe None
 
-    input_video_fps_sub_len = log10(input_video_fps_sub) if input_video_fps_sub != 0 else 0 # 桁数
-    input_video_fps_sub_scale = 10 ** (-input_video_fps_sub_len) # 桁補正係数
-
-    input_video_fps += input_video_fps_sub * input_video_fps_sub_scale
+    input_video_fps = integer_part_and_decimal_part_to_float(integer_part=input_video_fps_integer_part, decimal_part=input_video_fps_decimal_part)
 
     return FfmpegFpsResult(
       success=True,

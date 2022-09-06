@@ -91,3 +91,13 @@ matvtool audio -i input.mkv
 ```shell
 matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 ```
+
+
+## 開発
+
+### 依存関係の追加・更新
+
+```shell
+pip-compile requirements.in
+pip-compile requirements-test.in
+```

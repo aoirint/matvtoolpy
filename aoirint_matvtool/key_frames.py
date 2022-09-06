@@ -36,6 +36,7 @@ def ffmpeg_key_frames(
 
   try:
     while proc.poll() is None:
+      assert proc.stdout is not None
       line = proc.stdout.readline().rstrip()
 
       match = re.match(r'^frame,(.+)$', line)

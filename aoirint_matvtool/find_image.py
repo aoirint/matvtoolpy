@@ -1,10 +1,12 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import Generator, Optional, Union
+from typing import Generator, List, Optional, Union
 from pydantic import BaseModel
 
 from . import config
+from .util import exclude_none
+
 
 class FfmpegBlackframeOutputLine(BaseModel):
   frame: int
@@ -17,6 +19,7 @@ class FfmpegBlackframeOutputLine(BaseModel):
 class FfmpegProgressLine(BaseModel):
   frame: int
   time: str
+
 
 def ffmpeg_find_image_generator(
   input_video_ss: Optional[str],
@@ -33,7 +36,7 @@ def ffmpeg_find_image_generator(
   input_video_filter_fps = f'fps={fps}' if fps is not None else None
   input_video_filter_crop = f'crop={input_video_crop}' if input_video_crop is not None else None
 
-  input_video_filters = list(filter(lambda f: f is not None, [
+  input_video_filters = list(exclude_none([
     input_video_filter_fps,
     input_video_filter_crop,
   ]))
@@ -47,7 +50,7 @@ def ffmpeg_find_image_generator(
   reference_image_filter_fps = f'fps={fps}' if fps is not None else None
   reference_image_filter_crop = f'crop={reference_image_crop}' if reference_image_crop is not None else None
 
-  reference_image_filters = list(filter(lambda f: f is not None, [
+  reference_image_filters = list(exclude_none([
     reference_image_filter_fps,
     reference_image_filter_crop,
   ]))
@@ -65,7 +68,7 @@ def ffmpeg_find_image_generator(
   blend_filter_complex = f'[{blend_input_a_name}][{blend_input_b_name}]{blend_filter_complex_inner_string}'
 
   # Create the filter_complex string
-  filter_complex_filters = list(filter(lambda f: f is not None, [
+  filter_complex_filters = list(exclude_none([
     input_video_filter_complex,
     reference_image_filter_complex,
     blend_filter_complex,
@@ -112,6 +115,7 @@ def ffmpeg_find_image_generator(
 
   try:
     while proc.poll() is None:
+      assert proc.stderr is not None
       line = proc.stderr.readline().rstrip()
 
       match = re.match(r'^\[Parsed_blackframe.+?\]\ (frame:.+)$', line)
