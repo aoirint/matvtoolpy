@@ -112,6 +112,7 @@ def ffmpeg_find_image_generator(
 
   try:
     while proc.poll() is None:
+      assert proc.stderr is not None
       line = proc.stderr.readline().rstrip()
 
       match = re.match(r'^\[Parsed_blackframe.+?\]\ (frame:.+)$', line)
