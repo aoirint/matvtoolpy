@@ -6,11 +6,6 @@ from pydantic import BaseModel
 
 from . import config
 
-class FfmpegFindImageResult(BaseModel):
-  success: bool
-  message: Optional[str]
-  stderr: str
-
 class FfmpegBlackframeOutputLine(BaseModel):
   frame: int
   pblack: int
