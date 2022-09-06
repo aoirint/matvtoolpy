@@ -92,7 +92,7 @@ def command_find_image(args):
 
   # Time
   raw_start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
-  raw_start_timedelta = timedelta(hours=raw_start_time.hours, minutes=raw_start_time.minutes, seconds=raw_start_time.seconds, microseconds=raw_start_time.microseconds) if raw_start_time is not None else timedelta(seconds=0)
+  raw_start_timedelta = raw_start_time.to_timedelta() if raw_start_time is not None else timedelta(seconds=0)
   # raw_end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
 
   # キーフレーム情報をもとにstart_timedeltaを補正
@@ -142,7 +142,7 @@ def command_find_image(args):
     ):
       if isinstance(output, FfmpegProgressLine):
         internal_time = parse_ffmpeg_time_unit_syntax(output.time)
-        internal_timedelta = timedelta(hours=internal_time.hours, minutes=internal_time.minutes, seconds=internal_time.seconds, microseconds=internal_time.microseconds)
+        internal_timedelta = internal_time.to_timedelta()
 
         internal_time_string = format_timedelta(internal_timedelta)
 
