@@ -14,13 +14,7 @@ env:
 
 jobs:
   mypy:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: 'ubuntu-20.04'
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v3
@@ -38,3 +32,23 @@ jobs:
 
       - name: Run mypy
         run: mypy aoirint_matvtool
+
+  mypy-tests:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+            pip3 install wheel
+            pip3 install -r requirements-test.txt
+
+      - name: Run mypy
+        run: mypy tests
