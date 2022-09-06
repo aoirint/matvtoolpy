@@ -8,6 +8,9 @@ class FfmpegTimeUnitSyntax(BaseModel):
   seconds: int
   microseconds: int
 
+  def to_timedelta(self) -> timedelta:
+    return timedelta(hours=self.hours, minutes=self.minutes, seconds=self.seconds, microseconds=self.microseconds)
+
 
 def parse_ffmpeg_time_unit_syntax(string: str) -> FfmpegTimeUnitSyntax:
   match = re.match(r'^(\d+):(\d+):(\d+)(\.\d+)?$', string) # HOURS:MM:SS.MILLISECONDS
