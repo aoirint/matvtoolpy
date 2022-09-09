@@ -40,7 +40,7 @@ matvtool slice -ss 00:05:00 -to 00:10:00 -i input.mkv output.mkv
 
 ### crop_scale: 切り取り・拡大縮小
 
-`-vcodec`/`--video_codec`オプションで映像コーデックを指定できます。
+`-vcodec`/`--video_codec`オプションで出力時の映像コーデックを指定できます（未指定時は既定のエンコーダを使用）。
 
 ```shell
 # 左上1600x900を切り取って、1920x1080に拡大
