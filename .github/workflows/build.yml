@@ -61,7 +61,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             BASE_RUNTIME_IMAGE=${{ matrix.base_runtime_image }}
-            PYTHON_VERSION=${{ matrix.python_version }}
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
           cache-from: |
             type=registry,ref=${{ env.IMAGE_NAME_AND_TAG }}-buildcache
             type=registry,ref=${{ env.LATEST_IMAGE_NAME_AND_TAG }}-buildcache
