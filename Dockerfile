@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.3-labs
 ARG BASE_IMAGE=ubuntu:focal
 ARG BASE_RUNTIME_IMAGE=${BASE_IMAGE}
+
 FROM ${BASE_IMAGE} AS python-env
 
 ARG DEBIAN_FRONTEND=noninteractive
