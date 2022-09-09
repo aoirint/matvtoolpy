@@ -53,8 +53,8 @@ jobs:
           IMAGE_NAME_AND_TAG: ${{ format('{0}:{1}-{2}', env.IMAGE_NAME, matrix.image_variant_name, env.IMAGE_VERSION_NAME) }}
           LATEST_IMAGE_NAME_AND_TAG: ${{ format('{0}:{1}-{2}', env.IMAGE_NAME, matrix.image_variant_name, 'latest') }}
         with:
-          context: .
           builder: ${{ steps.buildx.outputs.name }}
+          context: .
           file: ./Dockerfile
           push: true
           tags: ${{ env.IMAGE_NAME_AND_TAG }}
