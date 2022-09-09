@@ -19,7 +19,7 @@ A command line tool to handle a multi audio track video file.
 - Dockerイメージ
   - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
     - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
-    - ~~NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`~~ （対応機能未実装 <https://github.com/aoirint/matvtoolpy/issues/17> ）
+    - NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
 
 ## 用途
 
