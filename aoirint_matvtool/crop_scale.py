@@ -22,6 +22,12 @@ def ffmpeg_crop_scale(
   output_path: Path,
 ) -> FfmpegCropScaleResult:
   # TODO: quality control
+  if crop is not None and ',' in crop:
+    raise ValueError('Invalid crop argument. Remove \',\' from crop.')
+
+  if scale is not None and ',' in scale:
+    raise ValueError('Invalid scale argument. Remove \',\' from scale.')
+
   crop_filter_string = f'crop={crop}' if crop is not None else None
   scale_filter_string = f'scale={scale}' if scale is not None else None
 
