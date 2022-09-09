@@ -7,7 +7,6 @@ FROM ${BASE_IMAGE} AS python-env
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PYENV_VERSION=v2.3.4
 ARG PYTHON_VERSION=3.9.13
-ARG PYTHON_ROOT=/opt/python
 
 RUN <<EOF
     apt-get update
@@ -41,7 +40,7 @@ RUN <<EOF
   git checkout "${PYENV_VERSION}"
 
   PREFIX=/opt/python-build $PYENV_ROOT/plugins/python-build/install.sh
-  /opt/python-build/bin/python-build -v "${PYTHON_VERSION}" "${PYTHON_ROOT}"
+  /opt/python-build/bin/python-build -v "${PYTHON_VERSION}" /opt/python
 
   rm -rf /opt/python-build /opt/pyenv
 EOF
