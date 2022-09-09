@@ -154,7 +154,7 @@ def ffmpeg_find_image_generator(
         internal_frame = int(match.group(1))
         internal_time = match.group(2).strip()
 
-        progress = FfmpegProgressLine(
+        yield FfmpegProgressLine(
           progress=FfmpegProgressData(
             internal_fps=internal_fps,
             internal_time_unit_syntax=internal_time,
@@ -163,7 +163,6 @@ def ffmpeg_find_image_generator(
             input_video_start_time_unit_syntax=input_video_ss,
           ),
         )
-        yield progress
 
     result_code = proc.wait()
     if result_code != 0:
