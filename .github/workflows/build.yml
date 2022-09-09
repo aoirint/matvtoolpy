@@ -24,10 +24,12 @@ jobs:
             base_image: 'ubuntu:focal'
             base_runtime_image: 'ubuntu:focal'
             image_variant_name: 'ubuntu'
+            sed: 'sed'
           -
             base_image: 'ubuntu:focal'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
+            sed: 'sed'
 
     runs-on: ubuntu-latest
 
@@ -47,6 +49,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      - name: Replace Version
+        run: |
+          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v3
         env:
@@ -58,6 +64,11 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ env.IMAGE_NAME_AND_TAG }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
+            BASE_RUNTIME_IMAGE=${{ matrix.base_runtime_image }}
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+          target: runtime-env
           cache-from: |
             type=registry,ref=${{ env.IMAGE_NAME_AND_TAG }}-buildcache
             type=registry,ref=${{ env.LATEST_IMAGE_NAME_AND_TAG }}-buildcache
