@@ -50,7 +50,7 @@ FROM ${BASE_RUNTIME_IMAGE} AS runtime-env
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-ENV PATH=/home/user/.local/bin:${PATH}
+ENV PATH=/home/user/.local/bin:/opt/python/bin:${PATH}
 
 RUN apt-get update && \
     apt-get install -y \
