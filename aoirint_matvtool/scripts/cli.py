@@ -255,8 +255,8 @@ def main():
 
   parser_crop_scale = subparsers.add_parser('crop_scale')
   parser_crop_scale.add_argument('-i', '--input_path', type=str, required=True)
-  parser_crop_scale.add_argument('--crop', type=str, required=True)
-  parser_crop_scale.add_argument('--scale', type=str, required=True)
+  parser_crop_scale.add_argument('--crop', type=str, required=False)
+  parser_crop_scale.add_argument('--scale', type=str, required=False)
   parser_crop_scale.add_argument('-vcodec', '--video_codec', type=str, required=False)
   parser_crop_scale.add_argument('output_path', type=str)
   parser_crop_scale.set_defaults(handler=command_crop_scale)
