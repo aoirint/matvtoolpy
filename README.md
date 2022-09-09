@@ -16,7 +16,10 @@ A command line tool to handle a multi audio track video file.
   - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
 - Pythonパッケージ: `pip3 install aoirint_matvtool`
   - PyPI: <https://pypi.org/project/aoirint-matvtool/>
-
+- Dockerイメージ
+  - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
+    - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
+    - NVIDIA GPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
 
 ## 用途
 
