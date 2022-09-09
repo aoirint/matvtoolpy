@@ -1,25 +1,37 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel
 
 from . import config
+from .util import exclude_none
+
 
 class FfmpegCropScaleResult(BaseModel):
   success: bool
   message: Optional[str]
   stderr: str
 
+
 def ffmpeg_crop_scale(
   input_path: Path,
-  crop: str,
-  scale: str,
+  crop: Optional[str],
+  scale: Optional[str],
   video_codec: Optional[str],
   output_path: Path,
 ) -> FfmpegCropScaleResult:
   # TODO: quality control
-  video_codec_opts =  ['-c:v', video_codec] if video_codec is not None else []
+  crop_filter_string = f'crop={crop}' if crop is not None else None
+  scale_filter_string = f'scale={scale}' if scale is not None else None
+
+  video_filters = list(exclude_none([
+    crop_filter_string,
+    scale_filter_string,
+  ]))
+  video_filter_opts = [ '-filter:v', ','.join(video_filters) ] if len(video_filters) != 0 else []
+
+  video_codec_opts =  [ '-c:v', video_codec ] if video_codec is not None else []
 
   command = [
     config.FFMPEG_PATH,
@@ -27,8 +39,7 @@ def ffmpeg_crop_scale(
     '-n', # fail if already exists
     '-i',
     str(input_path),
-    '-filter:v',
-    f'crop={crop},scale={scale}',
+    *video_filter_opts,
     *video_codec_opts,
     '-c:a',
     'copy',
