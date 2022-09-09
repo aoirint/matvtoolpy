@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import Generator, List, Optional, Union
+from typing import Iterable, Optional, Union
 from pydantic import BaseModel
 
 from . import config
@@ -31,7 +31,7 @@ def ffmpeg_find_image_generator(
   fps: Optional[int],
   blackframe_amount: int = 98,
   blackframe_threshold: int = 32,
-) -> Generator[Union[FfmpegBlackframeOutputLine, FfmpegProgressLine], None, None]:
+) -> Iterable[Union[FfmpegBlackframeOutputLine, FfmpegProgressLine]]:
   # Create the input video filter_complex string
   input_video_filter_fps = f'fps={fps}' if fps is not None else None
   input_video_filter_crop = f'crop={input_video_crop}' if input_video_crop is not None else None

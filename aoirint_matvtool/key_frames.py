@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import Generator
+from typing import Iterable
 from pydantic import BaseModel
 
 from . import config
@@ -11,7 +11,7 @@ class FfmpegKeyFrameOutputLine(BaseModel):
 
 def ffmpeg_key_frames(
   input_path: Path,
-) -> Generator[FfmpegKeyFrameOutputLine, None, None]:
+) -> Iterable[FfmpegKeyFrameOutputLine]:
   command = [
     config.FFPROBE_PATH,
     '-hide_banner',
