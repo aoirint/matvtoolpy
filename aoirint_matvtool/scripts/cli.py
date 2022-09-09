@@ -14,11 +14,12 @@ from aoirint_matvtool.fps import ffmpeg_fps
 from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
 from aoirint_matvtool.slice import ffmpeg_slice
 from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
-from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
+from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, ffmpeg_find_image_generator
 from aoirint_matvtool.select_audio import ffmpeg_select_audio
 from aoirint_matvtool.util import (
   parse_ffmpeg_time_unit_syntax,
 )
+from aoirint_matvtool.progress import iter_progress
 
 
 def command_input(args):
@@ -84,13 +85,11 @@ def command_find_image(args):
   blackframe_amount = args.blackframe_amount
   blackframe_threshold = args.blackframe_threshold
   output_interval = args.output_interval
-  progress = args.progress
+  progress_type = args.progress_type
 
   # FPS
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
   assert input_video_fps is not None, 'FPS info not found in the input video'
-
-  internal_fps = fps if fps is not None else input_video_fps
 
   # Time
   raw_start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
@@ -111,14 +110,6 @@ def command_find_image(args):
 
       start_timedelta = next_key_frame_timedelta
 
-  start_time_total_seconds = start_timedelta.total_seconds()
-  start_frame = start_time_total_seconds * input_video_fps
-
-  # tqdm
-  pbar = None
-  if progress == 'tqdm':
-    pbar = tqdm()
-
   # Common func
   def format_timedelta(td: timedelta) -> str:
     hours, remainder = divmod(td.seconds, 3600)
@@ -130,9 +121,9 @@ def command_find_image(args):
   prev_input_timedelta = timedelta(seconds=-output_interval)
 
   # Execute
-  try:
-    for output in ffmpeg_find_image_generator(
-      input_video_ss=ss,
+  for output, pbar in iter_progress(
+    iterable=ffmpeg_find_image_generator(
+      input_video_ss=ss, # FIXME: キーフレーム情報をもとにstart_timedeltaを補正
       input_video_to=to,
       input_video_path=input_video_path,
       input_video_crop=input_video_crop,
@@ -141,58 +132,15 @@ def command_find_image(args):
       fps=fps,
       blackframe_amount=blackframe_amount,
       blackframe_threshold=blackframe_threshold,
-    ):
-      if isinstance(output, FfmpegProgressLine):
-        internal_time = parse_ffmpeg_time_unit_syntax(output.time)
-        internal_timedelta = internal_time.to_timedelta()
+    ),
+    progress_type=progress_type,
+  ):
+    if isinstance(output, FfmpegBlackframeOutputLine):
+      progress = output.progress
 
-        internal_time_string = format_timedelta(internal_timedelta)
-
-        # 開始時間(ss)分、検出時刻を補正
-        input_timedelta = start_timedelta + internal_timedelta
-        input_time_string = format_timedelta(input_timedelta)
-
-        # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-        internal_frame = output.frame
-        rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-        input_frame = floor(start_frame + rescaled_output_frame)
-
-        if progress == 'tqdm':
-          pbar.set_postfix({
-            'time': input_time_string,
-            'frame': f'{input_frame}',
-            'internal_time': internal_time_string,
-            'internal_frame': f'{internal_frame}',
-          })
-          pbar.refresh()
-
-        if progress == 'plain':
-          print(f'Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})', file=sys.stderr)
-
-      if isinstance(output, FfmpegBlackframeOutputLine):
-        internal_timedelta = timedelta(seconds=output.t)
-        internal_time_string = format_timedelta(internal_timedelta)
-
-        # 開始時間(ss)分、検出時刻を補正
-        input_timedelta = start_timedelta + internal_timedelta
-        input_time_string = format_timedelta(input_timedelta)
-
-        if timedelta(seconds=output_interval) <= input_timedelta - prev_input_timedelta:
-          # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-          internal_frame = output.frame
-          rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-          input_frame = floor(start_frame + rescaled_output_frame)
-
-          if progress == 'tqdm':
-            pbar.clear()
-
-          print(f'Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})')
-
-          prev_input_timedelta = input_timedelta
-
-  finally:
-    if progress == 'tqdm':
-      pbar.close()
+      if timedelta(seconds=output_interval) <= progress.current_timedelta - prev_input_timedelta:
+        print(f'Output | Time {format_timedelta(progress.current_timedelta_as_input_video_scale)}, frame {progress.current_frame_as_input_video_scale} (Internal time {progress.internal_time_unit_syntax}, frame {progress.internal_frame})')
+        prev_input_timedelta = progress.current_frame_as_input_video_scale
 
 
 def command_audio(args):
@@ -272,7 +220,7 @@ def main():
   parser_find_image.add_argument('-ba', '--blackframe_amount', type=int, default=98)
   parser_find_image.add_argument('-bt', '--blackframe_threshold', type=int, default=32)
   parser_find_image.add_argument('-it', '--output_interval', type=float, default=0)
-  parser_find_image.add_argument('-p', '--progress', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
+  parser_find_image.add_argument('-p', '--progress_type', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_find_image.set_defaults(handler=command_find_image)
 
   parser_audio = subparsers.add_parser('audio')

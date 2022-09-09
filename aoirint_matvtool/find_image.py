@@ -4,11 +4,14 @@ import subprocess
 from typing import Iterable, Optional, Union
 from pydantic import BaseModel
 
+from aoirint_matvtool.fps import ffmpeg_fps
+
 from . import config
 from .util import exclude_none
+from .progress import FfmpegProgressLine, FfmpegProgressData
 
 
-class FfmpegBlackframeOutputLine(BaseModel):
+class FfmpegBlackframeOutputData(BaseModel):
   frame: int
   pblack: int
   pts: int
@@ -16,9 +19,9 @@ class FfmpegBlackframeOutputLine(BaseModel):
   type: str
   last_keyframe: int
 
-class FfmpegProgressLine(BaseModel):
-  frame: int
-  time: str
+class FfmpegBlackframeOutputLine(BaseModel):
+  blackframe: FfmpegBlackframeOutputData
+  progress: FfmpegProgressData
 
 
 def ffmpeg_find_image_generator(
@@ -32,6 +35,10 @@ def ffmpeg_find_image_generator(
   blackframe_amount: int = 98,
   blackframe_threshold: int = 32,
 ) -> Iterable[Union[FfmpegBlackframeOutputLine, FfmpegProgressLine]]:
+  input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
+  if input_video_fps is None:
+    raise ValueError('FPS info not found in the input video')
+
   # Create the input video filter_complex string
   input_video_filter_fps = f'fps={fps}' if fps is not None else None
   input_video_filter_crop = f'crop={input_video_crop}' if input_video_crop is not None else None
@@ -59,6 +66,9 @@ def ffmpeg_find_image_generator(
   if len(reference_image_filters) != 0:
     reference_image_filter_inner_string = ','.join(reference_image_filters)
     reference_image_filter_complex = f'[1:v]{reference_image_filter_inner_string}[vb]'
+
+  # Create internal vars
+  internal_fps = fps if fps is not None else input_video_fps
 
   # Create the blend filter_complex string
   blend_filter_complex_inner_string = f'blend=difference:shortest=1,blackframe=amount={blackframe_amount}:threshold={blackframe_threshold}'
@@ -127,17 +137,31 @@ def ffmpeg_find_image_generator(
           key, value = key_value.split(':', maxsplit=2)
           result_dict[key] = value
 
-        output = FfmpegBlackframeOutputLine.parse_obj(result_dict)
-        yield output
+        blackframe = FfmpegBlackframeOutputData.parse_obj(result_dict)
+        yield FfmpegBlackframeOutputLine(
+          blackframe=blackframe,
+          progress=FfmpegProgressData(
+            internal_fps=internal_fps,
+            internal_time_unit_syntax=blackframe.t,
+            internal_frame=blackframe.frame,
+            input_video_fps=input_video_fps,
+            input_video_start_time_unit_syntax=input_video_ss,
+          ),
+        )
 
       match = re.match(r'^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$', line)
       if match:
-        frame = int(match.group(1))
-        _time = match.group(2).strip()
+        internal_frame = int(match.group(1))
+        internal_time = match.group(2).strip()
 
         progress = FfmpegProgressLine(
-          frame=frame,
-          time=_time,
+          progress=FfmpegProgressData(
+            internal_fps=internal_fps,
+            internal_time_unit_syntax=internal_time,
+            internal_frame=internal_frame,
+            input_video_fps=input_video_fps,
+            input_video_start_time_unit_syntax=input_video_ss,
+          ),
         )
         yield progress
 
