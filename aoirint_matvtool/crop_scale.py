@@ -11,8 +11,16 @@ class FfmpegCropScaleResult(BaseModel):
   message: Optional[str]
   stderr: str
 
-def ffmpeg_crop_scale(input_path: Path, crop: str, scale: str, output_path: Path) -> FfmpegCropScaleResult:
+def ffmpeg_crop_scale(
+  input_path: Path,
+  crop: str,
+  scale: str,
+  video_codec: Optional[str],
+  output_path: Path,
+) -> FfmpegCropScaleResult:
   # TODO: quality control
+  video_codec_opts =  ['-c:v', video_codec] if video_codec is not None else []
+
   command = [
     config.FFMPEG_PATH,
     '-hide_banner',
@@ -21,6 +29,7 @@ def ffmpeg_crop_scale(input_path: Path, crop: str, scale: str, output_path: Path
     str(input_path),
     '-filter:v',
     f'crop={crop},scale={scale}',
+    *video_codec_opts,
     '-c:a',
     'copy',
     '-map',

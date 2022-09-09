@@ -19,7 +19,7 @@ A command line tool to handle a multi audio track video file.
 - Dockerイメージ
   - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
     - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
-    - ~~NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`~~ （対応機能未実装 <https://github.com/aoirint/matvtoolpy/issues/17> ）
+    - NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
 
 ## 用途
 
@@ -40,12 +40,23 @@ matvtool slice -ss 00:05:00 -to 00:10:00 -i input.mkv output.mkv
 
 ### crop_scale: 切り取り・拡大縮小
 
+`-vcodec`/`--video_codec`オプションで出力映像コーデックを指定できます（未指定時は既定のエンコーダを使用）。
+
 ```shell
 # 左上1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 output.mkv
 
 # 右下1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 1920:1080 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、libx264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec libx264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_h264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_h264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_hevcでエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_hevc output.mkv
 ```
 
 ### find_image: 画像の出現時間・出現フレームを検索

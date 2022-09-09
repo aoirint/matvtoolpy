@@ -61,12 +61,14 @@ def command_crop_scale(args):
   input_path = Path(args.input_path)
   crop = args.crop
   scale = args.scale
+  video_codec = args.video_codec
   output_path = Path(args.output_path)
 
   print(ffmpeg_crop_scale(
     input_path=input_path,
     crop=crop,
     scale=scale,
+    video_codec=video_codec,
     output_path=output_path,
   ))
 
@@ -255,6 +257,7 @@ def main():
   parser_crop_scale.add_argument('-i', '--input_path', type=str, required=True)
   parser_crop_scale.add_argument('--crop', type=str, required=True)
   parser_crop_scale.add_argument('--scale', type=str, required=True)
+  parser_crop_scale.add_argument('-vcodec', '--video_codec', type=str, required=False)
   parser_crop_scale.add_argument('output_path', type=str)
   parser_crop_scale.set_defaults(handler=command_crop_scale)
 
