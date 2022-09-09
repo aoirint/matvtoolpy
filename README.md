@@ -40,12 +40,23 @@ matvtool slice -ss 00:05:00 -to 00:10:00 -i input.mkv output.mkv
 
 ### crop_scale: 切り取り・拡大縮小
 
+`-vcodec`/`--video_codec`オプションで映像コーデックを指定できます。
+
 ```shell
 # 左上1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 output.mkv
 
 # 右下1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 1920:1080 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、libx264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec libx264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_h264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_h264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_hevcでエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_hevc output.mkv
 ```
 
 ### find_image: 画像の出現時間・出現フレームを検索
