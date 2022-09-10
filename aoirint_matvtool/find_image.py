@@ -141,8 +141,8 @@ def ffmpeg_find_image_generator(
         )
         yield progress
 
-    result_code = proc.wait()
-    if result_code != 0:
-      raise Exception(f'FFmpeg errored. code {result_code}')
+    returncode = proc.wait()
+    if returncode != 0:
+      raise Exception(f'FFmpeg errored. code {returncode}')
   finally:
     proc.kill()
