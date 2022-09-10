@@ -139,6 +139,9 @@ def command_find_image(args):
       progress = output.progress
 
       if timedelta(seconds=output_interval) <= progress.current_timedelta - prev_input_timedelta:
+        if pbar is not None:
+          pbar.clear()
+
         print(f'Output | Time {format_timedelta(progress.current_timedelta_as_input_video_scale)}, frame {progress.current_frame_as_input_video_scale} (Internal time {progress.internal_time_unit_syntax}, frame {progress.internal_frame})')
         prev_input_timedelta = progress.current_frame_as_input_video_scale
 
