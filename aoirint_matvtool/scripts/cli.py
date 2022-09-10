@@ -132,7 +132,7 @@ def command_find_image(args):
         # 開始時間(ss)・フレームレート(fps)分、フレームを補正
         internal_frame = output.frame
         rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-        input_frame = floor(start_frame + rescaled_output_frame)
+        input_frame = int(start_frame + rescaled_output_frame)
 
         if progress_type == 'tqdm':
           pbar.set_postfix({
@@ -158,7 +158,7 @@ def command_find_image(args):
           # 開始時間(ss)・フレームレート(fps)分、フレームを補正
           internal_frame = output.frame
           rescaled_output_frame = internal_frame / internal_fps * input_video_fps
-          input_frame = floor(start_frame + rescaled_output_frame)
+          input_frame = int(start_frame + rescaled_output_frame)
 
           if progress_type == 'tqdm':
             pbar.clear()
