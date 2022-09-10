@@ -15,7 +15,7 @@ from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_fra
 from aoirint_matvtool.slice import FfmpegSliceResult, ffmpeg_slice
 from aoirint_matvtool.crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
-from aoirint_matvtool.select_audio import ffmpeg_select_audio
+from aoirint_matvtool.select_audio import FfmpegSelectAudioResult, ffmpeg_select_audio
 from aoirint_matvtool.util import (
   format_timedelta_as_time_unit_syntax_string,
   get_real_start_timedelta_by_ss,
@@ -227,7 +227,6 @@ def command_find_image(args):
       pbar.close()
 
 
-# TODO: 進捗状況表示
 def command_audio(args):
   input_path = Path(args.input_path)
 
@@ -246,17 +245,42 @@ def command_audio(args):
       print(f'Audio Track {track.index}: {title}')
 
 
-# TODO: 進捗状況表示
 def command_select_audio(args):
   input_path = Path(args.input_path)
   audio_indexes = args.audio_index
   output_path = Path(args.output_path)
+  progress_type = args.progress_type
 
-  print(ffmpeg_select_audio(
-    input_path=input_path,
-    audio_indexes=audio_indexes,
-    output_path=output_path,
-  ))
+  # tqdm
+  pbar = None
+  if progress_type == 'tqdm':
+    pbar = tqdm()
+
+  try:
+    for output in ffmpeg_select_audio(
+      input_path=input_path,
+      audio_indexes=audio_indexes,
+      output_path=output_path,
+    ):
+      if isinstance(output, FfmpegProgressLine):
+        if progress_type == 'tqdm':
+          pbar.set_postfix({
+            'time': output.time,
+            'frame': f'{output.frame}',
+          })
+          pbar.refresh()
+
+        if progress_type == 'plain':
+          print(f'Progress | Time {output.time}, frame {output.frame}', file=sys.stderr)
+
+      if isinstance(output, FfmpegSelectAudioResult):
+        if progress_type == 'tqdm':
+          pbar.clear()
+
+        print(f'Output | {output}')
+  finally:
+    if progress_type == 'tqdm':
+      pbar.close()
 
 
 def main():
@@ -318,6 +342,7 @@ def main():
   parser_select_audio = subparsers.add_parser('select_audio')
   parser_select_audio.add_argument('-i', '--input_path', type=str, required=True)
   parser_select_audio.add_argument('--audio_index', type=int, nargs='+', required=True)
+  parser_select_audio.add_argument('-p', '--progress_type', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_select_audio.add_argument('output_path', type=str)
   parser_select_audio.set_defaults(handler=command_select_audio)
 
