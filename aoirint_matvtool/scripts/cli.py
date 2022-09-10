@@ -12,7 +12,7 @@ from aoirint_matvtool import config
 from aoirint_matvtool.inputs import ffmpeg_get_input
 from aoirint_matvtool.fps import ffmpeg_fps
 from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
-from aoirint_matvtool.slice import ffmpeg_slice
+from aoirint_matvtool.slice import FfmpegSliceResult, ffmpeg_slice
 from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
 from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
 from aoirint_matvtool.select_audio import ffmpeg_select_audio
@@ -48,19 +48,44 @@ def command_key_frames(args):
       print(f'{output.time:.06f}')
 
 
-# TODO: 進捗状況表示
 def command_slice(args):
   ss = args.ss
   to = args.to
   input_path = Path(args.input_path)
   output_path = Path(args.output_path)
+  progress_type = args.progress_type
 
-  print(ffmpeg_slice(
-    ss=ss,
-    to=to,
-    input_path=input_path,
-    output_path=output_path,
-  ))
+  # tqdm
+  pbar = None
+  if progress_type == 'tqdm':
+    pbar = tqdm()
+
+  try:
+    for output in ffmpeg_slice(
+      ss=ss,
+      to=to,
+      input_path=input_path,
+      output_path=output_path,
+    ):
+        if isinstance(output, FfmpegProgressLine):
+          if progress_type == 'tqdm':
+            pbar.set_postfix({
+              'time': output.time,
+              'frame': f'{output.frame}',
+            })
+            pbar.refresh()
+
+          if progress_type == 'plain':
+            print(f'Progress | Time {output.time}, frame {output.frame}', file=sys.stderr)
+
+        if isinstance(output, FfmpegSliceResult):
+          if progress_type == 'tqdm':
+            pbar.clear()
+
+          print(f'Output | {output}')
+  finally:
+    if progress_type == 'tqdm':
+      pbar.close()
 
 
 # TODO: 進捗状況表示
@@ -234,6 +259,7 @@ def main():
   parser_slice.add_argument('-ss', type=str, required=True)
   parser_slice.add_argument('-to', type=str, required=True)
   parser_slice.add_argument('-i', '--input_path', type=str, required=True)
+  parser_slice.add_argument('-p', '--progress_type', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_slice.add_argument('output_path', type=str)
   parser_slice.set_defaults(handler=command_slice)
 
