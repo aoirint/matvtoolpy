@@ -67,22 +67,22 @@ def command_slice(args):
       input_path=input_path,
       output_path=output_path,
     ):
-        if isinstance(output, FfmpegProgressLine):
-          if progress_type == 'tqdm':
-            pbar.set_postfix({
-              'time': output.time,
-              'frame': f'{output.frame}',
-            })
-            pbar.refresh()
+      if isinstance(output, FfmpegProgressLine):
+        if progress_type == 'tqdm':
+          pbar.set_postfix({
+            'time': output.time,
+            'frame': f'{output.frame}',
+          })
+          pbar.refresh()
 
-          if progress_type == 'plain':
-            print(f'Progress | Time {output.time}, frame {output.frame}', file=sys.stderr)
+        if progress_type == 'plain':
+          print(f'Progress | Time {output.time}, frame {output.frame}', file=sys.stderr)
 
-        if isinstance(output, FfmpegSliceResult):
-          if progress_type == 'tqdm':
-            pbar.clear()
+      if isinstance(output, FfmpegSliceResult):
+        if progress_type == 'tqdm':
+          pbar.clear()
 
-          print(f'Output | {output}')
+        print(f'Output | {output}')
   finally:
     if progress_type == 'tqdm':
       pbar.close()
