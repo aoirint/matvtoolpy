@@ -13,7 +13,7 @@ from aoirint_matvtool.inputs import ffmpeg_get_input
 from aoirint_matvtool.fps import ffmpeg_fps
 from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
 from aoirint_matvtool.slice import FfmpegSliceResult, ffmpeg_slice
-from aoirint_matvtool.crop_scale import ffmpeg_crop_scale
+from aoirint_matvtool.crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from aoirint_matvtool.find_image import FfmpegBlackframeOutputLine, FfmpegProgressLine, ffmpeg_find_image_generator
 from aoirint_matvtool.select_audio import ffmpeg_select_audio
 from aoirint_matvtool.util import (
@@ -88,21 +88,46 @@ def command_slice(args):
       pbar.close()
 
 
-# TODO: 進捗状況表示
 def command_crop_scale(args):
   input_path = Path(args.input_path)
   crop = args.crop
   scale = args.scale
   video_codec = args.video_codec
   output_path = Path(args.output_path)
+  progress_type = args.progress_type
 
-  print(ffmpeg_crop_scale(
-    input_path=input_path,
-    crop=crop,
-    scale=scale,
-    video_codec=video_codec,
-    output_path=output_path,
-  ))
+  # tqdm
+  pbar = None
+  if progress_type == 'tqdm':
+    pbar = tqdm()
+
+  try:
+    for output in ffmpeg_crop_scale(
+      input_path=input_path,
+      crop=crop,
+      scale=scale,
+      video_codec=video_codec,
+      output_path=output_path,
+    ):
+      if isinstance(output, FfmpegProgressLine):
+        if progress_type == 'tqdm':
+          pbar.set_postfix({
+            'time': output.time,
+            'frame': f'{output.frame}',
+          })
+          pbar.refresh()
+
+        if progress_type == 'plain':
+          print(f'Progress | Time {output.time}, frame {output.frame}', file=sys.stderr)
+
+      if isinstance(output, FfmpegCropScaleResult):
+        if progress_type == 'tqdm':
+          pbar.clear()
+
+        print(f'Output | {output}')
+  finally:
+    if progress_type == 'tqdm':
+      pbar.close()
 
 
 def command_find_image(args):
@@ -268,6 +293,7 @@ def main():
   parser_crop_scale.add_argument('--crop', type=str, required=False)
   parser_crop_scale.add_argument('--scale', type=str, required=False)
   parser_crop_scale.add_argument('-vcodec', '--video_codec', type=str, required=False)
+  parser_crop_scale.add_argument('-p', '--progress_type', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_crop_scale.add_argument('output_path', type=str)
   parser_crop_scale.set_defaults(handler=command_crop_scale)
 
