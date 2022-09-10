@@ -29,12 +29,14 @@ def command_input(args):
     input_path=input_path,
   ))
 
+
 def command_fps(args):
   input_path = Path(args.input_path)
 
   print(ffmpeg_fps(
     input_path=input_path,
   ).fps)
+
 
 def command_key_frames(args):
   input_path = Path(args.input_path)
@@ -45,6 +47,8 @@ def command_key_frames(args):
     if isinstance(output, FfmpegKeyFrameOutputLine):
       print(f'{output.time:.06f}')
 
+
+# TODO: 進捗状況表示
 def command_slice(args):
   ss = args.ss
   to = args.to
@@ -59,6 +63,7 @@ def command_slice(args):
   ))
 
 
+# TODO: 進捗状況表示
 def command_crop_scale(args):
   input_path = Path(args.input_path)
   crop = args.crop
@@ -172,6 +177,7 @@ def command_find_image(args):
       pbar.close()
 
 
+# TODO: 進捗状況表示
 def command_audio(args):
   input_path = Path(args.input_path)
 
@@ -190,6 +196,7 @@ def command_audio(args):
       print(f'Audio Track {track.index}: {title}')
 
 
+# TODO: 進捗状況表示
 def command_select_audio(args):
   input_path = Path(args.input_path)
   audio_indexes = args.audio_index
