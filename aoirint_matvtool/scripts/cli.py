@@ -86,7 +86,7 @@ def command_find_image(args):
   blackframe_amount = args.blackframe_amount
   blackframe_threshold = args.blackframe_threshold
   output_interval = args.output_interval
-  progress = args.progress
+  progress_type = args.progress_type
 
   # FPS
   input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
@@ -101,7 +101,7 @@ def command_find_image(args):
 
   # tqdm
   pbar = None
-  if progress == 'tqdm':
+  if progress_type == 'tqdm':
     pbar = tqdm()
 
   prev_input_timedelta = timedelta(seconds=-output_interval)
@@ -134,7 +134,7 @@ def command_find_image(args):
         rescaled_output_frame = internal_frame / internal_fps * input_video_fps
         input_frame = floor(start_frame + rescaled_output_frame)
 
-        if progress == 'tqdm':
+        if progress_type == 'tqdm':
           pbar.set_postfix({
             'time': input_time_string,
             'frame': f'{input_frame}',
@@ -143,7 +143,7 @@ def command_find_image(args):
           })
           pbar.refresh()
 
-        if progress == 'plain':
+        if progress_type == 'plain':
           print(f'Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})', file=sys.stderr)
 
       if isinstance(output, FfmpegBlackframeOutputLine):
@@ -160,7 +160,7 @@ def command_find_image(args):
           rescaled_output_frame = internal_frame / internal_fps * input_video_fps
           input_frame = floor(start_frame + rescaled_output_frame)
 
-          if progress == 'tqdm':
+          if progress_type == 'tqdm':
             pbar.clear()
 
           print(f'Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})')
@@ -168,7 +168,7 @@ def command_find_image(args):
           prev_input_timedelta = input_timedelta
 
   finally:
-    if progress == 'tqdm':
+    if progress_type == 'tqdm':
       pbar.close()
 
 
@@ -249,7 +249,7 @@ def main():
   parser_find_image.add_argument('-ba', '--blackframe_amount', type=int, default=98)
   parser_find_image.add_argument('-bt', '--blackframe_threshold', type=int, default=32)
   parser_find_image.add_argument('-it', '--output_interval', type=float, default=0)
-  parser_find_image.add_argument('-p', '--progress', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
+  parser_find_image.add_argument('-p', '--progress_type', type=str, choices=('tqdm', 'plain', 'none'), default='tqdm')
   parser_find_image.set_defaults(handler=command_find_image)
 
   parser_audio = subparsers.add_parser('audio')
