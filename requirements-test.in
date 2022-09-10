@@ -1,3 +1,5 @@
 -r requirements.in
 mypy
 types-tqdm
+pytest
+opencv-python
