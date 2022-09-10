@@ -13,7 +13,7 @@ setup(
 
     entry_points = {
       'console_scripts': [
-        'matvtool = aoirint_matvtool.scripts.cli:main',
+        'matvtool = aoirint_matvtool.cli.main:main',
       ],
     },
 
