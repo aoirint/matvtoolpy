@@ -1,26 +1,52 @@
 from pathlib import Path
 import re
 import subprocess
-from typing import List, Optional
+from typing import Iterable, Optional, Union
 from pydantic import BaseModel
 
 from . import config
+from .util import exclude_none
+from .find_image import FfmpegProgressLine
+
 
 class FfmpegCropScaleResult(BaseModel):
   success: bool
   message: Optional[str]
-  stderr: str
 
-def ffmpeg_crop_scale(input_path: Path, crop: str, scale: str, output_path: Path) -> FfmpegCropScaleResult:
+
+def ffmpeg_crop_scale(
+  input_path: Path,
+  crop: Optional[str],
+  scale: Optional[str],
+  video_codec: Optional[str],
+  output_path: Path,
+) -> Iterable[Union[FfmpegCropScaleResult, FfmpegProgressLine]]:
   # TODO: quality control
+  if crop is not None and ',' in crop:
+    raise ValueError('Invalid crop argument. Remove \',\' from crop.')
+
+  if scale is not None and ',' in scale:
+    raise ValueError('Invalid scale argument. Remove \',\' from scale.')
+
+  crop_filter_string = f'crop={crop}' if crop is not None else None
+  scale_filter_string = f'scale={scale}' if scale is not None else None
+
+  video_filters = list(exclude_none([
+    crop_filter_string,
+    scale_filter_string,
+  ]))
+  video_filter_opts = [ '-filter:v', ','.join(video_filters) ] if len(video_filters) != 0 else []
+
+  video_codec_opts =  [ '-c:v', video_codec ] if video_codec is not None else []
+
   command = [
     config.FFMPEG_PATH,
     '-hide_banner',
     '-n', # fail if already exists
     '-i',
     str(input_path),
-    '-filter:v',
-    f'crop={crop},scale={scale}',
+    *video_filter_opts,
+    *video_codec_opts,
     '-c:a',
     'copy',
     '-map',
@@ -29,12 +55,36 @@ def ffmpeg_crop_scale(input_path: Path, crop: str, scale: str, output_path: Path
     '0',
     str(output_path),
   ]
-  proc = subprocess.run(command, stderr=subprocess.PIPE)
-  stderr = proc.stderr.decode('utf-8')
-  lines = stderr.splitlines()
+  proc = subprocess.Popen(
+    command,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.PIPE,
+    encoding='utf-8',
+  )
+  
+  lines = []
+  try:
+    while proc.poll() is None:
+      assert proc.stderr is not None
+      line = proc.stderr.readline().rstrip()
+      lines += [ line ]
 
-  ret = proc.returncode
-  if ret != 0:
+      match = re.match(r'^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$', line)
+      if match:
+        frame = int(match.group(1))
+        _time = match.group(2).strip()
+
+        progress = FfmpegProgressLine(
+          frame=frame,
+          time=_time,
+        )
+        yield progress
+
+    returncode = proc.wait()
+  finally:
+    proc.kill()
+
+  if returncode != 0:
     # skip Input or indented block to head the error message
     line_index = 0
     while line_index < len(lines):
@@ -46,14 +96,12 @@ def ffmpeg_crop_scale(input_path: Path, crop: str, scale: str, output_path: Path
 
     message = '\n'.join(lines[line_index:]) if line_index != len(lines) else None
 
-    return FfmpegCropScaleResult(
+    yield FfmpegCropScaleResult(
       success=False,
       message=message,
-      stderr=stderr,
     )
-
-  return FfmpegCropScaleResult(
-    success=True,
-    message=None,
-    stderr=stderr,
-  )
+  else:
+    yield FfmpegCropScaleResult(
+      success=True,
+      message=None,
+    )

@@ -16,7 +16,10 @@ A command line tool to handle a multi audio track video file.
   - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
 - Pythonパッケージ: `pip3 install aoirint_matvtool`
   - PyPI: <https://pypi.org/project/aoirint-matvtool/>
-
+- Dockerイメージ
+  - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
+    - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
+    - NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
 
 ## 用途
 
@@ -37,12 +40,23 @@ matvtool slice -ss 00:05:00 -to 00:10:00 -i input.mkv output.mkv
 
 ### crop_scale: 切り取り・拡大縮小
 
+`-vcodec`/`--video_codec`オプションで出力映像コーデックを指定できます（未指定時は既定のエンコーダを使用）。
+
 ```shell
 # 左上1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 output.mkv
 
 # 右下1600x900を切り取って、1920x1080に拡大
 matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 1920:1080 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、libx264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec libx264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_h264でエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_h264 output.mkv
+
+# 左上1600x900を切り取って、1920x1080に拡大、nvenc_hevcでエンコード
+matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=0:y=0 --scale 1920:1080 -vcodec nvenc_hevc output.mkv
 ```
 
 ### find_image: 画像の出現時間・出現フレームを検索
@@ -61,7 +75,7 @@ matvtool crop_scale -i input.mkv --crop w=1600:h=900:x=iw-ow:y=ih-oh --scale 192
 `-it`/`--output_interval`オプションで、連続出現時の出力を抑制できます。手動処理を減らすためのオプションです。
 例えば、`-it 10`を指定すると、前回出現してから10秒間のフレームで再び出現を検出しても、ログ出力しません（[YouTubeのチャプター機能](https://support.google.com/youtube/answer/9884579)では、最小チャプター間隔は10秒）。
 
-`-p`, `--progress`オプションで、処理の進捗状況の出力方法を変更できます。
+`-p`, `--progress_type`オプションで、処理の進捗状況の出力方法を変更できます。
 値は、`tqdm` 標準エラー出力・インタラクティブシェル用（デフォルト）、`plain` 標準エラー出力・逐次出力、`none` 出力なし、が利用できます。
 
 処理に時間のかかる長い動画を入力するときは、`tee`コマンドなどで出力を永続化したり、`tmux`コマンドなどでバックグラウンド処理したりすると便利です。うまく出力が表示されないときは、一時的に環境変数`PYTHONUNBUFFERED=1`を設定すると改善するかもしれません。
