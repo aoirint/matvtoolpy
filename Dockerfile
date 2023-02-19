@@ -36,13 +36,14 @@ RUN <<EOF
 EOF
 
 RUN <<EOF
-  git clone https://github.com/pyenv/pyenv.git /opt/pyenv
-  git checkout "${PYENV_VERSION}"
+    git clone https://github.com/pyenv/pyenv.git /opt/pyenv
+    cd /opt/pyenv
+    git checkout "${PYENV_VERSION}"
 
-  PREFIX=/opt/python-build /opt/pyenv/plugins/python-build/install.sh
-  /opt/python-build/bin/python-build -v "${PYTHON_VERSION}" /opt/python
+    PREFIX=/opt/python-build /opt/pyenv/plugins/python-build/install.sh
+    /opt/python-build/bin/python-build -v "${PYTHON_VERSION}" /opt/python
 
-  rm -rf /opt/python-build /opt/pyenv
+    rm -rf /opt/python-build /opt/pyenv
 EOF
 
 
