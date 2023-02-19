@@ -9,6 +9,8 @@ ARG PYENV_VERSION=v2.3.4
 ARG PYTHON_VERSION=3.9.13
 
 RUN <<EOF
+    set -eu
+
     apt-get update
 
     apt-get install -y \
@@ -36,6 +38,8 @@ RUN <<EOF
 EOF
 
 RUN <<EOF
+    set -eu
+
     git clone https://github.com/pyenv/pyenv.git /opt/pyenv
     cd /opt/pyenv
     git checkout "${PYENV_VERSION}"
@@ -53,15 +57,21 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PATH=/home/user/.local/bin:/opt/python/bin:${PATH}
 
-RUN apt-get update && \
+RUN <<EOF
+    set -eu
+
+    apt-get update
     apt-get install -y \
         gosu \
-        ffmpeg && \
-    apt-get clean && \
+        ffmpeg
+    apt-get clean
     rm -rf /var/lib/apt/lists/*
+EOF
 
-RUN groupadd --non-unique --gid 1000 user && \
+RUN <<EOF
+    groupadd --non-unique --gid 1000 user
     useradd --non-unique --uid 1000 --gid 1000 --create-home user
+EOF
 
 COPY --from=python-env /opt/python /opt/python
 
@@ -70,8 +80,13 @@ RUN gosu user pip3 install -r /requirements.txt
 
 ADD --chown=user:user setup.py requirements.in README.md /opt/aoirint_matvtool/
 ADD --chown=user:user aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
-RUN cd /opt/aoirint_matvtool && \
+
+RUN <<EOF
+    set -eu
+
+    cd /opt/aoirint_matvtool
     gosu user pip3 install .
+EOF
 
 WORKDIR /work
 ENTRYPOINT [ "gosu", "user", "matvtool" ]
