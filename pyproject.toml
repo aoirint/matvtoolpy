@@ -21,7 +21,11 @@ description = "A command line tool to handle a multi audio track video file"
 authors = ["aoirint <aoirint@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/aoirint/matvtoolpy"
 packages = [{include = "aoirint_matvtool"}]
+
+[tool.poetry.scripts]
+matvtool = "aoirint_matvtool.scripts.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.11"
