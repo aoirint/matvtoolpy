@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from aoirint_matvtool.fps import ffmpeg_fps
 
-fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+fourcc = cv2.VideoWriter.fourcc(*"mp4v")
 
 
 @contextlib.contextmanager
