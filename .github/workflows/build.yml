@@ -199,7 +199,7 @@ jobs:
 
       - name: Build Binary
         run: |
-          poetry run pyinstaller --name matvtool --target_arch "${{ matrix.pyinstaller_target_architecture }}" --onefile aoirint_matvtool/scripts/cli.py
+          poetry run pyinstaller --name matvtool --target-architecture "${{ matrix.pyinstaller_target_architecture }}" --onefile aoirint_matvtool/scripts/cli.py
       
       - name: Upload Binary to Release
         uses: svenstaro/upload-release-action@v2
