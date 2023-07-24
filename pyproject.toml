@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "aoirint-matvtool"
+version = "0.0.0"
+description = "A command line tool to handle a multi audio track video file"
+authors = ["aoirint <aoirint@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "aoirint_matvtool"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
