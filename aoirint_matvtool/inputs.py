@@ -44,7 +44,9 @@ def __find_all_stream_line_index(lines: List[str]) -> List[int]:
   indexes: List[int] = []
 
   for line_index, line in enumerate(lines):
-    match = re.search(r'^  Stream #.+$', line)
+    # FFmpeg 4.2: indent level 4
+    # FFmpeg 4.4: indent level 2
+    match = re.search(r'^(?:\s{2}|\s{4})Stream #.+$', line)
     if match:
       indexes.append(line_index)
 
@@ -126,7 +128,10 @@ def ffmpeg_get_input(input_path: Path) -> FfmpegInput:
       stream_line_index_end = stream_line_indexes[stream_index + 1] if stream_index + 1 != len(stream_line_indexes) else len(input_lines)
 
       stream_line_header = input_lines[stream_line_index]
-      match_stream = re.search(r'^  Stream #(\d+?):(\d+?).*?: (Video|Audio): (.+)$', stream_line_header)
+
+    # FFmpeg 4.2: indent level 4
+    # FFmpeg 4.4: indent level 2
+      match_stream = re.search(r'^(?:\s{2}|\s{4})Stream #(\d+?):(\d+?).*?: (Video|Audio): (.+)$', stream_line_header)
       if not match_stream:
         continue
 
