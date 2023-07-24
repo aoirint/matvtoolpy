@@ -12,6 +12,7 @@ FFmpeg 4.2（Ubuntu 20.04の標準バージョン）および4.4（Ubuntu 22.04�
 - <https://ffmpeg.org/download.html>
 
 `matvtool`本体は、以下からダウンロード・インストールできます。
+Pythonパッケージとして導入する場合、Python 3.11をサポートしています。
 
 - バイナリ（Windows, Linux, macOS）
   - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
