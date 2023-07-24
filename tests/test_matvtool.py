@@ -51,7 +51,7 @@ def temporary_video_path() -> Generator[Path, None, None]:
 
 
 class TestMatvTool(TestCase):
-    def test_fps(self):
+    def test_fps(self) -> None:
         with temporary_video_path() as video_path:
             fps = ffmpeg_fps(input_path=video_path).fps
             assert fps == 60.0

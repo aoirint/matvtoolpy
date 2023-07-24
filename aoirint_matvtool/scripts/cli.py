@@ -23,7 +23,7 @@ from aoirint_matvtool.util import (
 from tqdm import tqdm
 
 
-def command_input(args):
+def command_input(args) -> None:
     input_path = Path(args.input_path)
     print(
         ffmpeg_get_input(
@@ -32,7 +32,7 @@ def command_input(args):
     )
 
 
-def command_fps(args):
+def command_fps(args) -> None:
     input_path = Path(args.input_path)
 
     print(
@@ -42,7 +42,7 @@ def command_fps(args):
     )
 
 
-def command_key_frames(args):
+def command_key_frames(args) -> None:
     input_path = Path(args.input_path)
 
     for output in ffmpeg_key_frames(
@@ -52,7 +52,7 @@ def command_key_frames(args):
             print(f"{output.time:.06f}")
 
 
-def command_slice(args):
+def command_slice(args) -> None:
     ss = args.ss
     to = args.to
     input_path = Path(args.input_path)
@@ -97,7 +97,7 @@ def command_slice(args):
             pbar.close()
 
 
-def command_crop_scale(args):
+def command_crop_scale(args) -> None:
     input_path = Path(args.input_path)
     crop = args.crop
     scale = args.scale
@@ -144,7 +144,7 @@ def command_crop_scale(args):
             pbar.close()
 
 
-def command_find_image(args):
+def command_find_image(args) -> None:
     ss = args.ss
     to = args.to
     input_video_path = Path(args.input_video_path)
@@ -261,7 +261,7 @@ def command_find_image(args):
             pbar.close()
 
 
-def command_audio(args):
+def command_audio(args) -> None:
     input_path = Path(args.input_path)
 
     inp = ffmpeg_get_input(
@@ -284,7 +284,7 @@ def command_audio(args):
             print(f"Audio Track {track.index}: {title}")
 
 
-def command_select_audio(args):
+def command_select_audio(args) -> None:
     input_path = Path(args.input_path)
     audio_indexes = args.audio_index
     output_path = Path(args.output_path)
@@ -327,7 +327,7 @@ def command_select_audio(args):
             pbar.close()
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
