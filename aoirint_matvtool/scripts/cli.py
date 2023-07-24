@@ -4,6 +4,7 @@ from argparse import ArgumentParser, Namespace
 from datetime import timedelta
 from pathlib import Path
 
+from aoirint_matvtool import __VERSION__ as PACKAGE_VERSION
 from aoirint_matvtool import config
 from aoirint_matvtool.crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from aoirint_matvtool.find_image import (
@@ -331,6 +332,7 @@ def command_select_audio(args: Namespace) -> None:
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("-l", "--log_level", type=int, default=logging.INFO)
+    parser.add_argument("-v", "--version", action="version", version=PACKAGE_VERSION)
     parser.add_argument("--ffmpeg_path", type=str, default=config.FFMPEG_PATH)
     parser.add_argument("--ffprobe_path", type=str, default=config.FFPROBE_PATH)
 
