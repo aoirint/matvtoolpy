@@ -116,7 +116,7 @@ matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 
 ```shell
 poetry add pydantic
-poetry add --group pytest
+poetry add --group dev pytest
 
 # requirements*.txtを更新
 poetry export --without-hashes -o requirements.txt
