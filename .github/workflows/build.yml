@@ -153,14 +153,14 @@ jobs:
             sed: 'gsed'
           -
             os: 'macos-11'
-            python_architecture: 'universal2'
+            python_architecture: 'x64'
             pyinstaller_target_architecture: 'arm64'
             artifact_name: matvtool
             asset_name: matvtool-macos-arm64
             sed: 'gsed'
           -
             os: 'macos-11'
-            python_architecture: 'universal2'
+            python_architecture: 'x64'
             pyinstaller_target_architecture: 'universal2'
             artifact_name: matvtool
             asset_name: matvtool-macos-universal2
