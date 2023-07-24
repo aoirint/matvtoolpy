@@ -1,7 +1,6 @@
 import logging
 
+FFMPEG_PATH = "ffmpeg"
+FFPROBE_PATH = "ffprobe"
 
-FFMPEG_PATH = 'ffmpeg'
-FFPROBE_PATH = 'ffprobe'
-
-logger = logging.getLogger('matvtool')
+logger = logging.getLogger("matvtool")
