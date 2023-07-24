@@ -132,16 +132,19 @@ jobs:
         include:
           -
             os: 'ubuntu-20.04'
+            python_architecture: 'x64'
             artifact_name: matvtool
             asset_name: matvtool-linux-amd64
             sed: 'sed'
           -
             os: 'windows-2019'
+            python_architecture: 'x64'
             artifact_name: matvtool.exe
             asset_name: matvtool-windows-amd64.exe
             sed: 'sed'
           -
             os: 'macos-11'
+            python_architecture: 'x64'
             artifact_name: matvtool
             asset_name: matvtool-macos-amd64
             sed: 'gsed'
@@ -159,6 +162,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          architecture: ${{ matrix.python_architecture }}
           cache: 'poetry'
 
       - name: Install gsed for macOS
