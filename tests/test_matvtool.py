@@ -1,11 +1,7 @@
-import sys
-from pathlib import Path
-from typing import Generator
-
-sys.path.append(str(Path(__file__).parent.parent))
-
 import contextlib
+from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Generator
 from unittest import TestCase
 
 import cv2  # type: ignore

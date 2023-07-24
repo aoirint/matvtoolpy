@@ -21,7 +21,7 @@ def ffmpeg_select_audio(
 ) -> Iterable[Union[FfmpegSelectAudioResult, FfmpegProgressLine]]:
     audio_map_options = []
     for audio_index in audio_indexes:
-        audio_map_options.append(f"-map")
+        audio_map_options.append("-map")
         audio_map_options.append(f"0:a:{audio_index}")
 
     command = [

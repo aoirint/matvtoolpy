@@ -1,9 +1,7 @@
 import logging
 import sys
 from datetime import timedelta
-from math import floor
 from pathlib import Path
-from typing import Optional
 
 from aoirint_matvtool import config
 from aoirint_matvtool.crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
@@ -22,7 +20,6 @@ from aoirint_matvtool.util import (
     get_real_start_timedelta_by_ss,
     parse_ffmpeg_time_unit_syntax,
 )
-from pydantic import BaseModel
 from tqdm import tqdm
 
 
@@ -223,7 +220,7 @@ def command_find_image(args):
 
                 if progress_type == "plain":
                     print(
-                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",
+                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",  # noqa: B950
                         file=sys.stderr,
                     )
 
@@ -254,7 +251,7 @@ def command_find_image(args):
                         pbar.clear()
 
                     print(
-                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"
+                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: B950
                     )
 
                     prev_input_timedelta = input_timedelta
