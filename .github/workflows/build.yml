@@ -52,6 +52,7 @@ jobs:
       - name: Replace Version
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v3
@@ -111,6 +112,7 @@ jobs:
       - name: Replace Version
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build Package
         run: python3 setup.py sdist bdist_wheel
@@ -169,6 +171,7 @@ jobs:
       - name: Replace Version
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build Binary
         run: |
