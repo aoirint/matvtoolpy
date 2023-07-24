@@ -13,6 +13,11 @@ pydantic = "^2.0.3"
 tqdm = "^4.65.0"
 
 
+[tool.poetry.group.dev.dependencies]
+types-tqdm = "^4.65.0.2"
+numpy = "^1.25.1"
+opencv-python = "^4.8.0.74"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
