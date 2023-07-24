@@ -111,6 +111,8 @@ matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 
 ## 開発
 
+Python 3.11を使って開発しています。
+
 ### 依存関係
 
 依存関係の管理に[Poetry](https://python-poetry.org/docs/#installation)を使っています。
