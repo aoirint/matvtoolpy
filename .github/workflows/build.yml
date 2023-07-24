@@ -51,7 +51,7 @@ jobs:
 
       - name: Replace Version
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build and Deploy Docker image
@@ -111,7 +111,7 @@ jobs:
 
       - name: Replace Version
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build Package
@@ -170,7 +170,7 @@ jobs:
 
       - name: Replace Version
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build Binary
