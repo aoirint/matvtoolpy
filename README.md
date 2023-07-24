@@ -115,6 +115,7 @@ matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 依存関係の管理に[Poetry](https://python-poetry.org/docs/#installation)を使っています。
 
 ```shell
+# Pythonパッケージを追加
 poetry add pydantic
 poetry add --group dev pytest
 
