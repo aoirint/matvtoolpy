@@ -1,0 +1,51 @@
+[tool.pysen]
+version = "0.10"
+
+[tool.pysen.lint]
+enable_black = true
+enable_flake8 = true
+enable_isort = true
+enable_mypy = true
+mypy_preset = "strict"
+line_length = 88
+py_version = "py310"
+
+  [[tool.pysen.lint.mypy_targets]]
+    paths = ["."]
+
+
+[tool.poetry]
+name = "aoirint-matvtool"
+version = "0.0.0"
+description = "A command line tool to handle a multi audio track video file"
+authors = ["aoirint <aoirint@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/aoirint/matvtoolpy"
+packages = [{include = "aoirint_matvtool"}]
+
+[tool.poetry.scripts]
+matvtool = "aoirint_matvtool.scripts.cli:main"
+
+[tool.poetry.dependencies]
+python = "~3.11"
+pydantic = "^2.0.3"
+tqdm = "^4.65.0"
+
+
+[tool.poetry.group.dev.dependencies]
+types-tqdm = "^4.65.0.2"
+numpy = "^1.25.1"
+opencv-python = "^4.8.0.74"
+pysen = "^0.10.4"
+black = "^23.7.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+flake8-bugbear = "^23.7.10"
+mypy = "^1.4.1"
+pytest = "^7.4.0"
+pyinstaller = "^5.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -12,7 +12,7 @@ env:
   VERSION: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || '0.0.0' }}
   IMAGE_NAME: aoirint/matvtoolpy
   IMAGE_VERSION_NAME: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || 'latest' }}
-  PYTHON_VERSION: '3.9.13'
+  PYTHON_VERSION: '3.11.4'
 
 jobs:
   deploy-docker:
@@ -50,8 +50,10 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Replace Version
+        shell: bash
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v3
@@ -92,16 +94,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-            pip3 install wheel
-            pip3 install -r requirements.txt
+          cache: 'poetry'
 
       - name: Install gsed for macOS
         if: startsWith(matrix.os, 'macos-')
@@ -109,17 +110,18 @@ jobs:
           brew install gnu-sed
 
       - name: Replace Version
+        shell: bash
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
-      - name: Build Package
-        run: python3 setup.py sdist bdist_wheel
+      - name: Install Dependencies
+        shell: bash
+        run: poetry install
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Build and publish Package
+        shell: bash
+        run: poetry publish --build --username "__token__" --password "${{ secrets.PYPI_API_TOKEN }}"
 
   release-binary:
     if: github.event.release.tag_name != ''
@@ -149,17 +151,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-          pip3 install wheel
-          pip3 install pyinstaller
-          pip3 install -r requirements.txt
+          cache: 'poetry'
 
       - name: Install gsed for macOS
         if: startsWith(matrix.os, 'macos-')
@@ -167,12 +167,18 @@ jobs:
           brew install gnu-sed
 
       - name: Replace Version
+        shell: bash
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
+
+      - name: Install Dependencies
+        shell: bash
+        run: poetry install
 
       - name: Build Binary
         run: |
-          pyinstaller --name matvtool --onefile aoirint_matvtool/scripts/cli.py
+          poetry run pyinstaller --name matvtool --onefile aoirint_matvtool/scripts/cli.py
       
       - name: Upload Binary to Release
         uses: svenstaro/upload-release-action@v2

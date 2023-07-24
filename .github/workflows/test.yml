@@ -10,48 +10,31 @@ on:
   pull_request:
 
 env:
-  PYTHON_VERSION: '3.9.13'
+  PYTHON_VERSION: '3.11.4'
 
 jobs:
-  mypy:
+  lint:
     runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-            pip3 install wheel
-            pip3 install -r requirements-test.txt
-
-      - name: Run mypy
-        run: mypy aoirint_matvtool
-
-  mypy-tests:
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v3
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: 'poetry'
 
       - name: Install Dependencies
-        run: |
-            pip3 install wheel
-            pip3 install -r requirements-test.txt
+        shell: bash
+        run: poetry install
 
-      - name: Run mypy
-        run: mypy tests
+      - name: Run lint
+        run: poetry run pysen run lint
 
   pytest:
     strategy:
@@ -66,16 +49,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: 'poetry'
 
       - name: Install Dependencies
-        run: |
-            pip3 install wheel
-            pip3 install -r requirements-test.txt
+        shell: bash
+        run: poetry install
 
       - name: Install FFmpeg
         run: |
@@ -87,4 +73,4 @@ jobs:
             ffmpeg -version
 
       - name: Run pytest
-        run: pytest tests
+        run: poetry run pytest tests/

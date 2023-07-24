@@ -12,6 +12,7 @@ FFmpeg 4.2（Ubuntu 20.04の標準バージョン）および4.4（Ubuntu 22.04�
 - <https://ffmpeg.org/download.html>
 
 `matvtool`本体は、以下からダウンロード・インストールできます。
+Pythonパッケージとして導入する場合、Python 3.11をサポートしています。
 
 - バイナリ（Windows, Linux, macOS）
   - GitHub Release: <https://github.com/aoirint/matvtoolpy/releases>
@@ -110,9 +111,18 @@ matvtool select_audio -i input.mkv --audio_index 2 3 -- output.mkv
 
 ## 開発
 
-### 依存関係の追加・更新
+Python 3.11を使って開発しています。
+
+### 依存関係
+
+依存関係の管理に[Poetry](https://python-poetry.org/docs/#installation)を使っています。
 
 ```shell
-pip-compile requirements.in
-pip-compile requirements-test.in
+# Pythonパッケージを追加
+poetry add pydantic
+poetry add --group dev pytest
+
+# requirements*.txtを更新
+poetry export --without-hashes -o requirements.txt
+poetry export --without-hashes --with dev -o requirements-dev.txt
 ```

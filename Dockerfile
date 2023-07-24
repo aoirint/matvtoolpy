@@ -5,8 +5,8 @@ ARG BASE_RUNTIME_IMAGE=${BASE_IMAGE}
 FROM ${BASE_IMAGE} AS python-env
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PYENV_VERSION=v2.3.4
-ARG PYTHON_VERSION=3.9.13
+ARG PYENV_VERSION=v2.3.23
+ARG PYTHON_VERSION=3.11.4
 
 RUN <<EOF
     set -eu
@@ -78,7 +78,7 @@ COPY --from=python-env /opt/python /opt/python
 ADD requirements.txt /
 RUN gosu user pip3 install -r /requirements.txt
 
-ADD --chown=user:user setup.py requirements.in README.md /opt/aoirint_matvtool/
+ADD --chown=user:user pyproject.toml README.md /opt/aoirint_matvtool/
 ADD --chown=user:user aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
 
 RUN <<EOF
