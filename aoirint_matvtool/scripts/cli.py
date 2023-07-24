@@ -61,9 +61,9 @@ def command_slice(args: Namespace) -> None:
     progress_type = args.progress_type
 
     # tqdm
-    pbar = None
+    tqdm_pbar = None
     if progress_type == "tqdm":
-        pbar = tqdm()
+        tqdm_pbar = tqdm()
 
     try:
         for output in ffmpeg_slice(
@@ -73,14 +73,14 @@ def command_slice(args: Namespace) -> None:
             output_path=output_path,
         ):
             if isinstance(output, FfmpegProgressLine):
-                if progress_type == "tqdm":
-                    pbar.set_postfix(
+                if tqdm_pbar is not None:
+                    tqdm_pbar.set_postfix(
                         {
                             "time": output.time,
                             "frame": f"{output.frame}",
                         }
                     )
-                    pbar.refresh()
+                    tqdm_pbar.refresh()
 
                 if progress_type == "plain":
                     print(
@@ -89,13 +89,13 @@ def command_slice(args: Namespace) -> None:
                     )
 
             if isinstance(output, FfmpegSliceResult):
-                if progress_type == "tqdm":
-                    pbar.clear()
+                if tqdm_pbar is not None:
+                    tqdm_pbar.clear()
 
                 print(f"Output | {output}")
     finally:
-        if progress_type == "tqdm":
-            pbar.close()
+        if tqdm_pbar is not None:
+            tqdm_pbar.close()
 
 
 def command_crop_scale(args: Namespace) -> None:
@@ -107,9 +107,9 @@ def command_crop_scale(args: Namespace) -> None:
     progress_type = args.progress_type
 
     # tqdm
-    pbar = None
+    tqdm_pbar = None
     if progress_type == "tqdm":
-        pbar = tqdm()
+        tqdm_pbar = tqdm()
 
     try:
         for output in ffmpeg_crop_scale(
@@ -120,14 +120,14 @@ def command_crop_scale(args: Namespace) -> None:
             output_path=output_path,
         ):
             if isinstance(output, FfmpegProgressLine):
-                if progress_type == "tqdm":
-                    pbar.set_postfix(
+                if tqdm_pbar is not None:
+                    tqdm_pbar.set_postfix(
                         {
                             "time": output.time,
                             "frame": f"{output.frame}",
                         }
                     )
-                    pbar.refresh()
+                    tqdm_pbar.refresh()
 
                 if progress_type == "plain":
                     print(
@@ -136,13 +136,13 @@ def command_crop_scale(args: Namespace) -> None:
                     )
 
             if isinstance(output, FfmpegCropScaleResult):
-                if progress_type == "tqdm":
-                    pbar.clear()
+                if tqdm_pbar is not None:
+                    tqdm_pbar.clear()
 
                 print(f"Output | {output}")
     finally:
-        if progress_type == "tqdm":
-            pbar.close()
+        if tqdm_pbar is not None:
+            tqdm_pbar.close()
 
 
 def command_find_image(args: Namespace) -> None:
@@ -170,9 +170,9 @@ def command_find_image(args: Namespace) -> None:
     start_frame = start_time_total_seconds * input_video_fps
 
     # tqdm
-    pbar = None
+    tqdm_pbar = None
     if progress_type == "tqdm":
-        pbar = tqdm()
+        tqdm_pbar = tqdm()
 
     prev_input_timedelta = timedelta(seconds=-output_interval)
 
@@ -208,8 +208,8 @@ def command_find_image(args: Namespace) -> None:
                 rescaled_output_frame = internal_frame / internal_fps * input_video_fps
                 input_frame = int(start_frame + rescaled_output_frame)
 
-                if progress_type == "tqdm":
-                    pbar.set_postfix(
+                if tqdm_pbar is not None:
+                    tqdm_pbar.set_postfix(
                         {
                             "time": input_time_string,
                             "frame": f"{input_frame}",
@@ -217,7 +217,7 @@ def command_find_image(args: Namespace) -> None:
                             "internal_frame": f"{internal_frame}",
                         }
                     )
-                    pbar.refresh()
+                    tqdm_pbar.refresh()
 
                 if progress_type == "plain":
                     print(
@@ -248,8 +248,8 @@ def command_find_image(args: Namespace) -> None:
                     )
                     input_frame = int(start_frame + rescaled_output_frame)
 
-                    if progress_type == "tqdm":
-                        pbar.clear()
+                    if tqdm_pbar is not None:
+                        tqdm_pbar.clear()
 
                     print(
                         f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: B950
@@ -258,8 +258,8 @@ def command_find_image(args: Namespace) -> None:
                     prev_input_timedelta = input_timedelta
 
     finally:
-        if progress_type == "tqdm":
-            pbar.close()
+        if tqdm_pbar is not None:
+            tqdm_pbar.close()
 
 
 def command_audio(args: Namespace) -> None:
@@ -292,9 +292,9 @@ def command_select_audio(args: Namespace) -> None:
     progress_type = args.progress_type
 
     # tqdm
-    pbar = None
+    tqdm_pbar = None
     if progress_type == "tqdm":
-        pbar = tqdm()
+        tqdm_pbar = tqdm()
 
     try:
         for output in ffmpeg_select_audio(
@@ -303,14 +303,14 @@ def command_select_audio(args: Namespace) -> None:
             output_path=output_path,
         ):
             if isinstance(output, FfmpegProgressLine):
-                if progress_type == "tqdm":
-                    pbar.set_postfix(
+                if tqdm_pbar is not None:
+                    tqdm_pbar.set_postfix(
                         {
                             "time": output.time,
                             "frame": f"{output.frame}",
                         }
                     )
-                    pbar.refresh()
+                    tqdm_pbar.refresh()
 
                 if progress_type == "plain":
                     print(
@@ -319,13 +319,13 @@ def command_select_audio(args: Namespace) -> None:
                     )
 
             if isinstance(output, FfmpegSelectAudioResult):
-                if progress_type == "tqdm":
-                    pbar.clear()
+                if tqdm_pbar is not None:
+                    tqdm_pbar.clear()
 
                 print(f"Output | {output}")
     finally:
-        if progress_type == "tqdm":
-            pbar.close()
+        if tqdm_pbar is not None:
+            tqdm_pbar.close()
 
 
 def main() -> None:
