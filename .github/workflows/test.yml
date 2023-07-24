@@ -34,7 +34,7 @@ jobs:
         run: poetry install
 
       - name: Run lint
-        run: pysen run lint
+        run: poetry run pysen run lint
 
   pytest:
     strategy:
