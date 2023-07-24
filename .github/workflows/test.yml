@@ -54,7 +54,14 @@ jobs:
         run: mypy tests
 
   pytest:
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: 'ubuntu-20.04'
+          - os: 'ubuntu-22.04'
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
