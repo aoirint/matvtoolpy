@@ -27,7 +27,7 @@ class FfmpegStream(BaseModel):
 
 
 class FfmpegInput(BaseModel):
-    index: str
+    index: int
     text: str
     streams: List[FfmpegStream]
     metadatas: List[FfmpegMetadataItem]
