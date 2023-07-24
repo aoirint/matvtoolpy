@@ -28,7 +28,7 @@ packages = [{include = "aoirint_matvtool"}]
 matvtool = "aoirint_matvtool.scripts.cli:main"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pydantic = "^2.0.3"
 tqdm = "^4.65.0"
 
