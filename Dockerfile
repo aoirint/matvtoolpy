@@ -78,7 +78,7 @@ COPY --from=python-env /opt/python /opt/python
 ADD requirements.txt /
 RUN gosu user pip3 install -r /requirements.txt
 
-ADD --chown=user:user setup.py requirements.in README.md /opt/aoirint_matvtool/
+ADD --chown=user:user pyproject.toml README.md /opt/aoirint_matvtool/
 ADD --chown=user:user aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
 
 RUN <<EOF
