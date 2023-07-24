@@ -133,20 +133,37 @@ jobs:
           -
             os: 'ubuntu-20.04'
             python_architecture: 'x64'
+            pyinstaller_target_architecture: 'x86_64'
             artifact_name: matvtool
             asset_name: matvtool-linux-amd64
             sed: 'sed'
           -
             os: 'windows-2019'
             python_architecture: 'x64'
+            pyinstaller_target_architecture: 'x86_64'
             artifact_name: matvtool.exe
             asset_name: matvtool-windows-amd64.exe
             sed: 'sed'
           -
             os: 'macos-11'
             python_architecture: 'x64'
+            pyinstaller_target_architecture: 'x86_64'
             artifact_name: matvtool
             asset_name: matvtool-macos-amd64
+            sed: 'gsed'
+          -
+            os: 'macos-11'
+            python_architecture: 'universal2'
+            pyinstaller_target_architecture: 'arm64'
+            artifact_name: matvtool
+            asset_name: matvtool-macos-arm64
+            sed: 'gsed'
+          -
+            os: 'macos-11'
+            python_architecture: 'universal2'
+            pyinstaller_target_architecture: 'universal2'
+            artifact_name: matvtool
+            asset_name: matvtool-macos-universal2
             sed: 'gsed'
 
     runs-on: ${{ matrix.os }}
@@ -182,7 +199,7 @@ jobs:
 
       - name: Build Binary
         run: |
-          poetry run pyinstaller --name matvtool --onefile aoirint_matvtool/scripts/cli.py
+          poetry run pyinstaller --name matvtool --target_arch "${{ matrix.pyinstaller_target_architecture }}" --onefile aoirint_matvtool/scripts/cli.py
       
       - name: Upload Binary to Release
         uses: svenstaro/upload-release-action@v2
