@@ -1,6 +1,0 @@
--r requirements.in
-mypy
-types-tqdm
-pytest
-numpy
-opencv-python
