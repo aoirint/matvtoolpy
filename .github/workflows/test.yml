@@ -19,15 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'requirements-dev.txt'
+          cache: 'poetry'
 
       - name: Install Dependencies
-        run: pip install -r requirements-dev.txt
+        shell: bash
+        run: poetry install
 
       - name: Run lint
         run: pysen run lint
@@ -45,15 +49,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Poetry
+        shell: bash
+        run: pipx install poetry
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'requirements-dev.txt'
+          cache: 'poetry'
 
       - name: Install Dependencies
-        run: pip install -r requirements-dev.txt
+        shell: bash
+        run: poetry install
 
       - name: Install FFmpeg
         run: |
