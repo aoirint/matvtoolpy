@@ -1,5 +1,6 @@
 import logging
 import sys
+from argparse import ArgumentParser, Namespace
 from datetime import timedelta
 from pathlib import Path
 
@@ -23,7 +24,7 @@ from aoirint_matvtool.util import (
 from tqdm import tqdm
 
 
-def command_input(args) -> None:
+def command_input(args: Namespace) -> None:
     input_path = Path(args.input_path)
     print(
         ffmpeg_get_input(
@@ -32,7 +33,7 @@ def command_input(args) -> None:
     )
 
 
-def command_fps(args) -> None:
+def command_fps(args: Namespace) -> None:
     input_path = Path(args.input_path)
 
     print(
@@ -42,7 +43,7 @@ def command_fps(args) -> None:
     )
 
 
-def command_key_frames(args) -> None:
+def command_key_frames(args: Namespace) -> None:
     input_path = Path(args.input_path)
 
     for output in ffmpeg_key_frames(
@@ -52,7 +53,7 @@ def command_key_frames(args) -> None:
             print(f"{output.time:.06f}")
 
 
-def command_slice(args) -> None:
+def command_slice(args: Namespace) -> None:
     ss = args.ss
     to = args.to
     input_path = Path(args.input_path)
@@ -97,7 +98,7 @@ def command_slice(args) -> None:
             pbar.close()
 
 
-def command_crop_scale(args) -> None:
+def command_crop_scale(args: Namespace) -> None:
     input_path = Path(args.input_path)
     crop = args.crop
     scale = args.scale
@@ -144,7 +145,7 @@ def command_crop_scale(args) -> None:
             pbar.close()
 
 
-def command_find_image(args) -> None:
+def command_find_image(args: Namespace) -> None:
     ss = args.ss
     to = args.to
     input_video_path = Path(args.input_video_path)
@@ -261,7 +262,7 @@ def command_find_image(args) -> None:
             pbar.close()
 
 
-def command_audio(args) -> None:
+def command_audio(args: Namespace) -> None:
     input_path = Path(args.input_path)
 
     inp = ffmpeg_get_input(
@@ -284,7 +285,7 @@ def command_audio(args) -> None:
             print(f"Audio Track {track.index}: {title}")
 
 
-def command_select_audio(args) -> None:
+def command_select_audio(args: Namespace) -> None:
     input_path = Path(args.input_path)
     audio_indexes = args.audio_index
     output_path = Path(args.output_path)
@@ -328,9 +329,7 @@ def command_select_audio(args) -> None:
 
 
 def main() -> None:
-    import argparse
-
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("-l", "--log_level", type=int, default=logging.INFO)
     parser.add_argument("--ffmpeg_path", type=str, default=config.FFMPEG_PATH)
     parser.add_argument("--ffprobe_path", type=str, default=config.FFPROBE_PATH)
