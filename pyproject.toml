@@ -9,6 +9,8 @@ packages = [{include = "aoirint_matvtool"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+pydantic = "^2.0.3"
+tqdm = "^4.65.0"
 
 
 [build-system]
