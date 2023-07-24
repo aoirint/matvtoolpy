@@ -50,6 +50,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Replace Version
+        shell: bash
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
@@ -110,6 +111,7 @@ jobs:
           brew install gnu-sed
 
       - name: Replace Version
+        shell: bash
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
@@ -169,6 +171,7 @@ jobs:
           brew install gnu-sed
 
       - name: Replace Version
+        shell: bash
         run: |
           ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
