@@ -42,17 +42,28 @@ def ffmpeg_key_frames(
             assert proc.stdout is not None
             line = proc.stdout.readline().rstrip()
 
+            # frame,0.007000
+            # frame,0.007000,side_data,H.26[45] User Data Unregistered SEI message
+            # frame,0.007000side_data,H.26[45] User Data Unregistered SEI message
+            row = line.split(",")
+            if len(row) < 2:
+                continue
+
+            if row[0] == "frame":
+                continue
+
+            seconds_string = row[1].strip()
+
             # Workaround for FFprobe issue: (side_data.+)?
             # https://trac.ffmpeg.org/ticket/7153
             # Correct: frame,0.007000,side_data,H.26[45] User Data Unregistered SEI message
             # Broken: frame,0.007000side_data,H.26[45] User Data Unregistered SEI message
-            match = re.match(r"^frame,(.+?)(side_data.+)?$", line)
-            # match = re.match(r"^frame,(.+)$", line)
+            if seconds_string.endswith("side_data"):
+                seconds_string = seconds_string[:-9]  # 0.007000side_data -> 0.007000
 
-            if match:  # frame,1.983000
-                seconds = float(match.group(1).strip())
-                output = FfmpegKeyFrameOutputLine(time=seconds)
-                yield output
+            seconds = float(seconds_string)
+            output = FfmpegKeyFrameOutputLine(time=seconds)
+            yield output
 
         result_code = proc.wait()
         if result_code != 0:
