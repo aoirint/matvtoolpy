@@ -42,7 +42,13 @@ def ffmpeg_key_frames(
             assert proc.stdout is not None
             line = proc.stdout.readline().rstrip()
 
-            match = re.match(r"^frame,(.+)$", line)
+            # Workaround for FFprobe issue: (side_data.+)?
+            # https://trac.ffmpeg.org/ticket/7153
+            # Correct: frame,0.007000,side_data,H.26[45] User Data Unregistered SEI message
+            # Broken: frame,0.007000side_data,H.26[45] User Data Unregistered SEI message
+            match = re.match(r"^frame,(.+?)(side_data.+)?$", line)
+            # match = re.match(r"^frame,(.+)$", line)
+
             if match:  # frame,1.983000
                 seconds = float(match.group(1).strip())
                 output = FfmpegKeyFrameOutputLine(time=seconds)
