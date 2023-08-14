@@ -48,7 +48,7 @@ def ffmpeg_key_frames(
             if len(row) < 2:
                 continue
 
-            if row[0] == "frame":
+            if row[0] != "frame":
                 continue
 
             seconds_string = row[1].strip()
