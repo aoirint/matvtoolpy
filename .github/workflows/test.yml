@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  PYTHON_VERSION: '3.11.4'
+  PYTHON_VERSION: '3.11.6'
 
 jobs:
   lint:
