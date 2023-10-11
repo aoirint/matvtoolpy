@@ -21,12 +21,12 @@ jobs:
       matrix:
         include:
           -
-            base_image: 'ubuntu:focal'
-            base_runtime_image: 'ubuntu:focal'
+            base_image: 'ubuntu:20.04'
+            base_runtime_image: 'ubuntu:20.04'
             image_variant_name: 'ubuntu'
             sed: 'sed'
           -
-            base_image: 'ubuntu:focal'
+            base_image: 'ubuntu:20.04'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
             sed: 'sed'

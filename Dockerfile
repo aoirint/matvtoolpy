@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-ARG BASE_IMAGE=ubuntu:focal
+ARG BASE_IMAGE=ubuntu:20.04
 ARG BASE_RUNTIME_IMAGE=${BASE_IMAGE}
 
 FROM ${BASE_IMAGE} AS python-env
