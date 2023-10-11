@@ -12,7 +12,7 @@ env:
   VERSION: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || '0.0.0' }}
   IMAGE_NAME: aoirint/matvtoolpy
   IMAGE_VERSION_NAME: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || 'latest' }}
-  PYTHON_VERSION: '3.11.4'
+  PYTHON_VERSION: '3.11.6'
 
 jobs:
   deploy-docker:
