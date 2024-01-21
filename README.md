@@ -121,8 +121,4 @@ Python 3.11を使って開発しています。
 # Pythonパッケージを追加
 poetry add pydantic
 poetry add --group dev pytest
-
-# requirements*.txtを更新
-poetry export --without-hashes -o requirements.txt
-poetry export --without-hashes --with dev -o requirements-dev.txt
 ```
