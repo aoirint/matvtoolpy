@@ -17,15 +17,20 @@ env:
 jobs:
   deploy-docker:
     strategy:
+      max-parallel: 2
       fail-fast: false
       matrix:
         include:
           -
+            docker_image_registry: 'docker.io'
+            docker_cache_registry: 'docker.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'ubuntu:20.04'
             image_variant_name: 'ubuntu'
             sed: 'sed'
           -
+            docker_image_registry: 'docker.io'
+            docker_cache_registry: 'docker.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
@@ -43,9 +48,10 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Registry
+      - name: Login to Docker Hub (docker.io)
         uses: docker/login-action@v3
         with:
+          registry: 'docker.io'
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
@@ -58,8 +64,8 @@ jobs:
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v5
         env:
-          IMAGE_NAME_AND_TAG: ${{ format('{0}:{1}-{2}', env.IMAGE_NAME, matrix.image_variant_name, env.IMAGE_VERSION_NAME) }}
-          LATEST_IMAGE_NAME_AND_TAG: ${{ format('{0}:{1}-{2}', env.IMAGE_NAME, matrix.image_variant_name, 'latest') }}
+          IMAGE_NAME_AND_TAG: ${{ format('{0}/{1}:{2}-{3}', matrix.docker_image_registry, env.IMAGE_NAME, matrix.image_variant_name, env.IMAGE_VERSION_NAME) }}
+          LATEST_IMAGE_NAME_AND_TAG: ${{ format('{0}/{1}:{2}-{3}', matrix.docker_cache_registry, env.IMAGE_NAME, matrix.image_variant_name, 'latest') }}
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
