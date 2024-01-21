@@ -75,18 +75,35 @@ EOF
 
 COPY --from=python-env /opt/python /opt/python
 
-ADD requirements.txt /
-RUN gosu user pip3 install -r /requirements.txt
+ARG POETRY_VERSION=1.7.1
+RUN <<EOF
+    set -eu
 
-ADD --chown=user:user pyproject.toml README.md /opt/aoirint_matvtool/
-ADD --chown=user:user aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
+    gosu user pip install "poetry==${POETRY_VERSION}"
+EOF
 
 RUN <<EOF
     set -eu
 
-    cd /opt/aoirint_matvtool
-    gosu user pip3 install .
+    mkdir -p /home/user/.cache/pypoetry/{cache,artifacts}
+    chown -R "user:user" /home/user/.cache
+
+    mkdir -p /code/matvtoolpy
+    chown -R "user:user" /code/matvtoolpy
 EOF
+
+ADD ./pyproject.toml ./poetry.lock /code/matvtoolpy/
+RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache \
+    --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/artifacts <<EOF
+    set -eu
+
+    cd /code/matvtoolpy
+    gosu user poetry config virtualenvs.in-project true
+    gosu user poetry install --only main
+EOF
+
+ENV PATH=/code/matvtoolpy/.venv/bin:${PATH}
+ADD ./aoirint_matvtool /code/matvtoolpy/aoirint_matvtool
 
 WORKDIR /work
 ENTRYPOINT [ "gosu", "user", "matvtool" ]

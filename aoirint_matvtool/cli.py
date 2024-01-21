@@ -4,25 +4,26 @@ from argparse import ArgumentParser, Namespace
 from datetime import timedelta
 from pathlib import Path
 
-from aoirint_matvtool import __VERSION__ as PACKAGE_VERSION
-from aoirint_matvtool import config
-from aoirint_matvtool.crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
-from aoirint_matvtool.find_image import (
+from tqdm import tqdm
+
+from . import __VERSION__ as PACKAGE_VERSION
+from . import config
+from .crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
+from .find_image import (
     FfmpegBlackframeOutputLine,
     FfmpegProgressLine,
     ffmpeg_find_image_generator,
 )
-from aoirint_matvtool.fps import ffmpeg_fps
-from aoirint_matvtool.inputs import ffmpeg_get_input
-from aoirint_matvtool.key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
-from aoirint_matvtool.select_audio import FfmpegSelectAudioResult, ffmpeg_select_audio
-from aoirint_matvtool.slice import FfmpegSliceResult, ffmpeg_slice
-from aoirint_matvtool.util import (
+from .fps import ffmpeg_fps
+from .inputs import ffmpeg_get_input
+from .key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
+from .select_audio import FfmpegSelectAudioResult, ffmpeg_select_audio
+from .slice import FfmpegSliceResult, ffmpeg_slice
+from .util import (
     format_timedelta_as_time_unit_syntax_string,
     get_real_start_timedelta_by_ss,
     parse_ffmpeg_time_unit_syntax,
 )
-from tqdm import tqdm
 
 
 def command_input(args: Namespace) -> None:
@@ -441,7 +442,3 @@ def main() -> None:
         args.handler(args)
     else:
         parser.print_help()
-
-
-if __name__ == "__main__":
-    main()

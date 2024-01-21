@@ -1,6 +1,0 @@
-annotated-types==0.6.0 ; python_version >= "3.11" and python_version < "3.12"
-colorama==0.4.6 ; python_version >= "3.11" and python_version < "3.12" and platform_system == "Windows"
-pydantic-core==2.10.1 ; python_version >= "3.11" and python_version < "3.12"
-pydantic==2.4.2 ; python_version >= "3.11" and python_version < "3.12"
-tqdm==4.66.1 ; python_version >= "3.11" and python_version < "3.12"
-typing-extensions==4.8.0 ; python_version >= "3.11" and python_version < "3.12"
