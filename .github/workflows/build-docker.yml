@@ -31,28 +31,24 @@ jobs:
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'ubuntu:20.04'
             image_variant_name: 'ubuntu'
-            sed: 'sed'
           -
             docker_image_registry: 'ghcr.io'
             docker_cache_registry: 'ghcr.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
-            sed: 'sed'
           -
             docker_image_registry: 'docker.io'
             docker_cache_registry: 'ghcr.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'ubuntu:20.04'
             image_variant_name: 'ubuntu'
-            sed: 'sed'
           -
             docker_image_registry: 'docker.io'
             docker_cache_registry: 'ghcr.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
-            sed: 'sed'
 
     runs-on: ubuntu-latest
 
@@ -83,8 +79,8 @@ jobs:
       - name: Replace Version
         shell: bash
         run: |
-          ${{ matrix.sed }} -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
-          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
+          sed -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
+          sed -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v5
