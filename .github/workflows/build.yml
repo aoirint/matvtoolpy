@@ -26,15 +26,29 @@ jobs:
       matrix:
         include:
           -
+            docker_image_registry: 'ghcr.io'
+            docker_cache_registry: 'ghcr.io'
+            base_image: 'ubuntu:20.04'
+            base_runtime_image: 'ubuntu:20.04'
+            image_variant_name: 'ubuntu'
+            sed: 'sed'
+          -
+            docker_image_registry: 'ghcr.io'
+            docker_cache_registry: 'ghcr.io'
+            base_image: 'ubuntu:20.04'
+            base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
+            image_variant_name: 'nvidia'
+            sed: 'sed'
+          -
             docker_image_registry: 'docker.io'
-            docker_cache_registry: 'docker.io'
+            docker_cache_registry: 'ghcr.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'ubuntu:20.04'
             image_variant_name: 'ubuntu'
             sed: 'sed'
           -
             docker_image_registry: 'docker.io'
-            docker_cache_registry: 'docker.io'
+            docker_cache_registry: 'ghcr.io'
             base_image: 'ubuntu:20.04'
             base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
             image_variant_name: 'nvidia'
