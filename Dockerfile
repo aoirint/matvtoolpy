@@ -100,11 +100,20 @@ RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache
     set -eu
 
     cd /code/matvtoolpy
-    gosu user poetry install --only main
+    gosu user poetry install --no-root --only main
 EOF
 
 ENV PATH=/code/matvtoolpy/.venv/bin:${PATH}
 ADD ./aoirint_matvtool /code/matvtoolpy/aoirint_matvtool
+ADD ./README.md /code/matvtoolpy/
+
+RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache \
+    --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/artifacts <<EOF
+    set -eu
+
+    cd /code/matvtoolpy
+    gosu user poetry install --only main
+EOF
 
 WORKDIR /work
 ENTRYPOINT [ "gosu", "user", "matvtool" ]
