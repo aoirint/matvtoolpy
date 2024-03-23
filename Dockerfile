@@ -69,6 +69,8 @@ RUN <<EOF
 EOF
 
 RUN <<EOF
+    set -eu
+
     groupadd --non-unique --gid 1000 user
     useradd --non-unique --uid 1000 --gid 1000 --create-home user
 EOF
