@@ -80,13 +80,15 @@ RUN <<EOF
     set -eu
 
     gosu user pip install "poetry==${POETRY_VERSION}"
+
+    gosu user poetry config virtualenvs.in-project true
+
+    mkdir -p /home/user/.cache/pypoetry/{cache,artifacts}
+    chown -R "user:user" /home/user/.cache
 EOF
 
 RUN <<EOF
     set -eu
-
-    mkdir -p /home/user/.cache/pypoetry/{cache,artifacts}
-    chown -R "user:user" /home/user/.cache
 
     mkdir -p /code/matvtoolpy
     chown -R "user:user" /code/matvtoolpy
@@ -98,7 +100,6 @@ RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache
     set -eu
 
     cd /code/matvtoolpy
-    gosu user poetry config virtualenvs.in-project true
     gosu user poetry install --only main
 EOF
 
