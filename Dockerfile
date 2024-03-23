@@ -75,7 +75,7 @@ EOF
 
 COPY --from=python-env /opt/python /opt/python
 
-ARG POETRY_VERSION=1.7.1
+ARG POETRY_VERSION=1.8.2
 RUN <<EOF
     set -eu
 
