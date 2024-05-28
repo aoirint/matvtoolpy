@@ -1,5 +1,5 @@
 [tool.pysen]
-version = "0.10"
+version = "0.11"
 
 [tool.pysen.lint]
 enable_black = true
@@ -29,22 +29,22 @@ matvtool = "aoirint_matvtool.cli:main"
 
 [tool.poetry.dependencies]
 python = "~3.11"
-pydantic = "^2.0.3"
-tqdm = "^4.65.0"
+pydantic = "^2.7.1"
+tqdm = "^4.66.4"
 
 
 [tool.poetry.group.dev.dependencies]
-types-tqdm = "^4.65.0.2"
-numpy = "^1.25.1"
-opencv-python = "^4.8.0.74"
-pysen = "^0.10.4"
-black = ">=23.7,<25.0"
-isort = "^5.12.0"
-flake8 = "^6.0.0"
-flake8-bugbear = "^23.7.10"
-mypy = "^1.4.1"
-pytest = "^7.4.0"
-pyinstaller = "^5.13.0"
+types-tqdm = "^4.66.0.20240417"
+numpy = "^1.26.4"
+opencv-python = "^4.9.0.80"
+pysen = "^0.11.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+flake8-bugbear = "^24.4.26"
+mypy = "^1.10.0"
+pytest = "^8.2.1"
+pyinstaller = "^6.7.0"
 
 [build-system]
 requires = ["poetry-core"]
