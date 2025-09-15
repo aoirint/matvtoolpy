@@ -101,6 +101,7 @@ jobs:
       - generate-version
       - create-draft-release
       - build-docker-ghcr
+      - build-docker-dockerhub
       - release-pypi
       - release-binary
     if: needs.generate-version.outputs.git_version != 'edge'
