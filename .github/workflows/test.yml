@@ -9,6 +9,10 @@ on:
       - "main"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     strategy:
@@ -23,19 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Poetry
-        shell: bash
-        run: pipx install poetry
-
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: '3.11'
-          cache: 'poetry'
+          enable-cache: true
+          cache-suffix: ${{ runner.os }}
 
-      - name: Install Dependencies
-        shell: bash
-        run: poetry sync
+      - name: Install Python Dependencies
+        run: uv sync --all-groups
 
       - name: Install FFmpeg
         run: |
@@ -47,4 +47,4 @@ jobs:
           ffmpeg -version
 
       - name: Run pytest
-        run: poetry run pytest tests/
+        run: uv run pytest tests/

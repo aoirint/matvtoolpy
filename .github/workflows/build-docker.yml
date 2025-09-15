@@ -18,6 +18,10 @@ env:
   IMAGE_VERSION_NAME: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || 'latest' }}
   PYTHON_VERSION: '3.11.13'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build-and-push-docker:
     strategy:
@@ -77,7 +81,6 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Replace Version
-        shell: bash
         run: |
           sed -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
           sed -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml

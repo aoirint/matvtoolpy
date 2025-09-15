@@ -9,6 +9,10 @@ on:
       - "main"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -16,19 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Poetry
-        shell: bash
-        run: pipx install poetry
-
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: '3.11'
-          cache: 'poetry'
+          enable-cache: true
+          cache-suffix: ${{ runner.os }}
 
-      - name: Install Dependencies
-        shell: bash
-        run: poetry sync
+      - name: Install Python Dependencies
+        run: uv sync --all-groups
 
       # 以降のステップが失敗してもキャッシュを保持するため、明示的にキャッシュを復元する
       - name: Restore Lint cache
@@ -44,15 +44,15 @@ jobs:
 
       # リンターチェック
       - name: Run Ruff lint check
-        run: poetry run ruff check
+        run: uv run ruff check
 
       # フォーマットチェック
       - name: Run Ruff format check
-        run: poetry run ruff format --check
+        run: uv run ruff format --check
 
       # 型チェック
       - name: Run mypy
-        run: poetry run mypy .
+        run: uv run mypy .
 
       # Lintが失敗してもキャッシュを保存する
       - name: Save Lint cache
