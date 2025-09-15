@@ -78,6 +78,7 @@ jobs:
       app_version: ${{ needs.generate-version.outputs.app_version }}
       git_version: ${{ needs.generate-version.outputs.git_version }}
 
+  # GitHub ReleaseのDraftを解除して公開する
   publish-release:
     needs:
       - generate-version
