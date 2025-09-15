@@ -20,8 +20,8 @@ Pythonパッケージとして導入する場合、Python 3.11をサポートし
   - PyPI: <https://pypi.org/project/aoirint-matvtool/>
 - Dockerイメージ
   - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
-    - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
-    - NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
+    - CPU: `docker run --rm -v ".:/work" -w "/work" aoirint/matvtoolpy --help`
+    - NVIDIA GPU: `docker run --rm --gpus 'all,"capabilities=video"' -v ".:/work" -w "/work" aoirint/matvtoolpy --help`
 
 ## 用途
 
