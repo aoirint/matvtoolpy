@@ -51,6 +51,9 @@ jobs:
       - name: Install Python Dependencies
         run: uv sync --all-groups
 
+      - name: Build Package
+        run: uv build
+
       # NOTE: PyPIでTrusted publisherとしてGitHubリポジトリの登録が必要
-      - name: Build and publish Package
-        run: uv publish
+      - name: Publish Package
+        run: uv publish --trusted-publishing always
