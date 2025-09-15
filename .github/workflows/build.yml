@@ -30,13 +30,13 @@ jobs:
       version: ${{ github.event.inputs.version }}
       is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
 
-  # GitHub Releaseを作成する
-  create-release:
+  # GitHub ReleaseをDraftとして作成する
+  create-draft-release:
     needs:
       - generate-version
     permissions:
       contents: write
-    uses: ./.github/workflows/_create-release.yml
+    uses: ./.github/workflows/_create-draft-release.yml
     with:
       git_version: ${{ needs.generate-version.outputs.git_version }}
 
@@ -44,7 +44,7 @@ jobs:
   build-docker-ghcr:
     needs:
       - generate-version
-      - create-release
+      - create-draft-release
     permissions:
       contents: read
       packages: write
@@ -58,7 +58,7 @@ jobs:
   release-pypi:
     needs:
       - generate-version
-      - create-release
+      - create-draft-release
     permissions:
       contents: read
     uses: ./.github/workflows/_release-pypi.yml
@@ -69,10 +69,24 @@ jobs:
   release-binary:
     needs:
       - generate-version
-      - create-release
+      - create-draft-release
     permissions:
       contents: write
     uses: ./.github/workflows/_release-binary.yml
     with:
       app_version: ${{ needs.generate-version.outputs.app_version }}
       git_version: ${{ needs.generate-version.outputs.git_version }}
+
+  publish-release:
+    needs:
+      - generate-version
+      - create-draft-release
+      - build-docker-ghcr
+      - release-pypi
+      - release-binary
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_publish-release.yml
+    with:
+      git_version: ${{ needs.generate-version.outputs.git_version }}
+      is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
