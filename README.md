@@ -133,3 +133,13 @@ uv run ruff format
 
 uv run mypy .
 ```
+
+## リリース手順
+
+1. [Actions](https://github.com/aoirint/matvtoolpy/actions)タブで、[Build Docker](https://github.com/aoirint/matvtoolpy/actions/workflows/build-docker.yml)を選択します。
+2. 「Run workflow」ボタンをクリックし、フォームにリリース設定を入力します。
+    - バージョンは`vX.Y.Z`形式で指定します。
+    - 変更をテストするためのビルドを作成する場合、`vX.Y.Z.dev0`のようなPEP 440形式の開発バージョンを使用します。バージョン文字列はDockerイメージのタグの一部として有効な形式である必要があります。
+    - 最新安定版としてリリースする場合は「最新安定版かどうか」にチェックを入れます。`main`ブランチでのリリース時は、原則として最新安定版とします。
+3. フォーム内の「Run workflow」ボタンをクリックし、ワークフローを実行します。
+    - ワークフローによりGitHub Releaseが作成され、ghcrへDockerイメージがプッシュされます。
