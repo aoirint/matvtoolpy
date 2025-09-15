@@ -15,8 +15,6 @@ on:
 
 permissions:
   contents: write
-  # NOTE: Trusted publishingに必要
-  id-token: write
 
 defaults:
   run:
