@@ -128,3 +128,5 @@ jobs:
     uses: ./.github/workflows/_publish-failed-release.yml
     with:
       git_version: ${{ needs.generate-version.outputs.git_version }}
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

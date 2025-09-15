@@ -8,6 +8,10 @@ on:
         description: 'アプリケーションのバージョン（PEP 440）'
         type: string
         required: true
+    secrets:
+      PYPI_TOKEN:
+        description: 'PyPIのAPIトークン'
+        required: true
 
 permissions:
   contents: read
@@ -56,6 +60,8 @@ jobs:
       - name: Build Package
         run: uv build
 
-      # NOTE: PyPIでTrusted publisherとしてGitHubリポジトリの登録が必要
+      # TODO: PyPIでReusable workflowをTrusted publisherとして利用できるようになったら、Trusted Publishingに移行したい
       - name: Publish Package
-        run: uv publish --trusted-publishing always
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: uv publish
