@@ -1,0 +1,118 @@
+# DockerイメージをビルドしてGitHub Container Registryにデプロイする
+name: Build Docker for ghcr.io
+
+on:
+  workflow_call:
+    inputs:
+      docker_version:
+        description: 'Dockerイメージのバージョン（edge または v{version}）'
+        type: string
+        required: true
+      app_version:
+        description: 'アプリケーションのバージョン（PEP 440）'
+        type: string
+        required: true
+      is_latest:
+        description: '最新安定版かどうか（latestタグをプッシュするか）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-docker-ghcr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry (ghcr.io)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Docker repository name
+        id: generate-repository-name
+        run: |
+          echo "repository_name=ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> "${GITHUB_OUTPUT}"
+
+      - name: Generate Docker metadata for ghcr.io
+        id: meta-ghcr
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.generate-repository-name.outputs.repository_name }}
+          tags: |
+            type=raw,value=${{ inputs.docker_version }}
+            type=raw,value=latest,enable=${{ github.event.inputs.is_latest == 'true' }}
+
+      # 常にedgeのビルドキャッシュを使用
+      - name: Generate Docker build cache source metadata
+        id: meta-buildcache-source
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.generate-repository-name.outputs.repository_name }}
+          tags: |
+            type=raw,value=edge-buildcache
+
+      # edgeの場合のみビルドキャッシュを作成
+      - name: Generate Docker build cache destination metadata
+        id: meta-buildcache-destination
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.generate-repository-name.outputs.repository_name }}
+          tags: |
+            ${{ inputs.docker_version == 'edge' && 'type=raw,value=edge-buildcache' || '' }}
+
+      - name: Generate Docker build cache metadata vars
+        id: meta-buildcache-vars
+        env:
+          DOCKER_METADATA_BUILDCACHE_SOURCE_OUTPUT_JSON: ${{ steps.meta-buildcache-source.outputs.json }}
+          DOCKER_METADATA_BUILDCACHE_DESTINATION_OUTPUT_JSON: ${{ steps.meta-buildcache-destination.outputs.json }}
+        run: |
+          {
+            echo "cache-from<<EOF"
+            for tag in $(jq -r '.tags[]' <<< "${DOCKER_METADATA_BUILDCACHE_SOURCE_OUTPUT_JSON}"); do
+              echo "type=registry,ref=${tag}"
+            done
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+          {
+            echo "cache-to<<EOF"
+            for tag in $(jq -r '.tags[]' <<< "${DOCKER_METADATA_BUILDCACHE_DESTINATION_OUTPUT_JSON}"); do
+              echo "type=registry,ref=${tag},mode=max"
+            done
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Build and Deploy Docker image
+        uses: docker/build-push-action@v5
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: 'linux/amd64'
+          tags: |
+            ${{ steps.meta-ghcr.outputs.tags }}
+          build-args: |
+            APP_VERSION=${{ inputs.app_version }}
+          cache-from: ${{ steps.meta-buildcache-vars.outputs.cache-from }}
+          cache-to: ${{ steps.meta-buildcache-vars.outputs.cache-to }}
+          labels: ${{ steps.meta-ghcr.outputs.labels }}
+          annotations: ${{ steps.meta-ghcr.outputs.annotations }}

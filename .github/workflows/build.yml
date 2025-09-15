@@ -1,0 +1,78 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'バージョン（edge または v{version}）'
+        type: string
+        required: true
+      is_latest:
+        description: '最新安定版かどうか（latestタグをプッシュするか）'
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # 用途に応じたバージョン文字列を生成する
+  generate-version:
+    permissions: {}
+    uses: ./.github/workflows/_generate-version.yml
+    with:
+      version: ${{ inputs.version }}
+      is_latest: ${{ inputs.is_latest }} 
+
+  # GitHub Releaseを作成する
+  create-release:
+    needs:
+      - generate-version
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_create-release.yml
+    with:
+      git_version: ${{ needs.generate-version.outputs.git_version }}
+
+  # DockerイメージをビルドしてGitHub Container Registryにデプロイする
+  build-docker-ghcr:
+    needs:
+      - generate-version
+      - create-release
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_build-docker-ghcr.yml
+    with:
+      docker_version: ${{ needs.generate-version.outputs.docker_version }}
+      app_version: ${{ needs.generate-version.outputs.app_version }}
+      is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
+
+  # PythonパッケージをPyPIにリリースする
+  release-pypi:
+    needs:
+      - generate-version
+      - create-release
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_release-pypi.yml
+    with:
+      app_version: ${{ needs.generate-version.outputs.app_version }}
+
+  # 実行可能ファイルをビルドしてGitHub Releaseにアップロードする
+  release-binary:
+    needs:
+      - generate-version
+      - create-release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_release-binary.yml
+    with:
+      app_version: ${{ needs.generate-version.outputs.app_version }}
+      git_version: ${{ needs.generate-version.outputs.git_version }}
