@@ -1,0 +1,48 @@
+# 失敗したリリースのDraftを解除して公開する
+name: Publish Failed Release
+
+on:
+  workflow_call:
+    inputs:
+      git_version:
+        description: 'Gitタグとしてのバージョン（v{version}）'
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish-failed-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 失敗したリリースのDraftを解除して公開
+      - name: Publish Failed Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.git_version }}
+          commit: ${{ github.sha }}
+          draft: false
+          prerelease: true
+          body: |-
+            # ❌ Automated Release Failed
+
+            The automated release process has failed.
+
+            This release has been published to retain the tag and preserve release immutability.
+
+            **Do not use this version except for debugging purposes.**
+
+            **This release will be removed without prior notice.**
+
+            👉 You can check the error details here: [View GitHub Actions Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          allowUpdates: true
+          omitNameDuringUpdate: false
+          omitDraftDuringUpdate: false
+          omitPrereleaseDuringUpdate: false
+          omitBodyDuringUpdate: false

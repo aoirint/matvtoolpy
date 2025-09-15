@@ -36,5 +36,5 @@ jobs:
 
             **Do not make manual changes until the process has finished.**
 
-            👉 You can track the progress here: [View GitHub Actions Run](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
+            👉 You can track the progress here: [View GitHub Actions Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           allowUpdates: false

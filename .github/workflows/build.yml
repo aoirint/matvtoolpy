@@ -111,3 +111,20 @@ jobs:
     with:
       git_version: ${{ needs.generate-version.outputs.git_version }}
       is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
+
+  # 失敗したリリースを公開する
+  publish-failed-release:
+    needs:
+      - generate-version
+      - create-draft-release
+      - build-docker-ghcr
+      - build-docker-dockerhub
+      - release-pypi
+      - release-binary
+      - publish-release
+    if: needs.generate-version.outputs.git_version != 'edge' && failure()
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_publish-failed-release.yml
+    with:
+      git_version: ${{ needs.generate-version.outputs.git_version }}
