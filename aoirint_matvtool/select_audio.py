@@ -2,7 +2,6 @@ import re
 import subprocess
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -12,14 +11,14 @@ from .find_image import FfmpegProgressLine
 
 class FfmpegSelectAudioResult(BaseModel):
     success: bool
-    message: Optional[str]
+    message: str | None
 
 
 def ffmpeg_select_audio(
     input_path: Path,
     audio_indexes: list[int],
     output_path: Path,
-) -> Iterable[Union[FfmpegSelectAudioResult, FfmpegProgressLine]]:
+) -> Iterable[FfmpegSelectAudioResult | FfmpegProgressLine]:
     audio_map_options = []
     for audio_index in audio_indexes:
         audio_map_options.append("-map")

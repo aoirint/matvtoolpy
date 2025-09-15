@@ -1,6 +1,5 @@
 import re
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -10,7 +9,7 @@ from .util import integer_part_and_decimal_part_to_float
 
 class FfmpegFpsResult(BaseModel):
     success: bool
-    fps: Optional[float]
+    fps: float | None
 
 
 def ffmpeg_fps(input_path: Path) -> FfmpegFpsResult:

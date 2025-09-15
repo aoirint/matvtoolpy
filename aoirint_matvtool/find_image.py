@@ -2,7 +2,6 @@ import re
 import subprocess
 from collections.abc import Generator
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -25,16 +24,16 @@ class FfmpegProgressLine(BaseModel):
 
 
 def ffmpeg_find_image_generator(
-    input_video_ss: Optional[str],
-    input_video_to: Optional[str],
+    input_video_ss: str | None,
+    input_video_to: str | None,
     input_video_path: Path,
-    input_video_crop: Optional[str],
+    input_video_crop: str | None,
     reference_image_path: Path,
-    reference_image_crop: Optional[str],
-    fps: Optional[int],
+    reference_image_crop: str | None,
+    fps: int | None,
     blackframe_amount: int = 98,
     blackframe_threshold: int = 32,
-) -> Generator[Union[FfmpegBlackframeOutputLine, FfmpegProgressLine], None, None]:
+) -> Generator[FfmpegBlackframeOutputLine | FfmpegProgressLine, None, None]:
     # Create the input video filter_complex string
     input_video_filter_fps = f"fps={fps}" if fps is not None else None
     input_video_filter_crop = (
@@ -50,7 +49,7 @@ def ffmpeg_find_image_generator(
         )
     )
 
-    input_video_filter_complex: Optional[str] = None
+    input_video_filter_complex: str | None = None
     if len(input_video_filters) != 0:
         input_video_filter_inner_string = ",".join(input_video_filters)
         input_video_filter_complex = f"[0:v]{input_video_filter_inner_string}[va]"
@@ -70,7 +69,7 @@ def ffmpeg_find_image_generator(
         )
     )
 
-    reference_image_filter_complex: Optional[str] = None
+    reference_image_filter_complex: str | None = None
     if len(reference_image_filters) != 0:
         reference_image_filter_inner_string = ",".join(reference_image_filters)
         reference_image_filter_complex = (
