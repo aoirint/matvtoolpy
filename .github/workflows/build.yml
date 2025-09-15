@@ -13,7 +13,7 @@ on:
         type: string
         required: true
       is_latest:
-        description: '最新安定版かどうか（latestタグをプッシュするか）'
+        description: '最新安定版かどうか（Prereleaseを解除してLatestにするか）'
         type: boolean
         default: false
 
