@@ -115,12 +115,12 @@ Python 3.11を使って開発しています。
 
 ### 依存関係
 
-依存関係の管理に[Poetry](https://python-poetry.org/docs/#installation)を使っています。
+依存関係の管理に[uv](https://docs.astral.sh/uv/getting-started/installation/)を使っています。
 
 ```shell
 # Pythonパッケージを追加
-poetry add pydantic
-poetry add --group dev pytest
+uv add pydantic
+uv add --group dev pytest
 ```
 
 ### コードフォーマット
@@ -128,8 +128,8 @@ poetry add --group dev pytest
 コードフォーマットには[Ruff](https://docs.astral.sh/ruff/)と[Mypy](https://www.mypy-lang.org)を使っています。
 
 ```shell
-poetry run ruff check --fix
-poetry run ruff format
+uv run ruff check --fix
+uv run ruff format
 
-poetry run mypy .
+uv run mypy .
 ```
