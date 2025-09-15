@@ -81,6 +81,8 @@ jobs:
     uses: ./.github/workflows/_release-pypi.yml
     with:
       app_version: ${{ needs.generate-version.outputs.app_version }}
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
   # 実行可能ファイルをビルドしてGitHub Releaseにアップロードする
   release-binary:
@@ -128,5 +130,3 @@ jobs:
     uses: ./.github/workflows/_publish-failed-release.yml
     with:
       git_version: ${{ needs.generate-version.outputs.git_version }}
-    secrets:
-      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
