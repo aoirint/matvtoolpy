@@ -1,0 +1,90 @@
+# ghcr.io上のマニフェストリストをDocker Hubにプッシュする
+name: Build Docker for Docker Hub
+
+on:
+  workflow_call:
+    inputs:
+      dockerhub_repository:
+        description: 'リポジトリ名'
+        type: string
+        required: true
+      docker_version:
+        description: 'Dockerイメージのバージョン（edge または v{version}）'
+        type: string
+        required: true
+      is_latest:
+        description: '最新安定版かどうか（latestタグをプッシュするか）'
+        type: boolean
+        default: false
+    secrets:
+      DOCKERHUB_TOKEN:
+        description: 'Docker Hubのアクセストークン'
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-docker-dockerhub:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry (ghcr.io)
+        uses: docker/login-action@v3
+        with:
+          registry: 'ghcr.io'
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: 'docker.io'
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Generate Docker repository name for ghcr.io
+        id: generate-repository-name-ghcr
+        run: |
+          echo "repository_name=ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> "${GITHUB_OUTPUT}"
+
+      - name: Generate Docker metadata for ghcr.io
+        id: meta-ghcr
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.generate-repository-name-ghcr.outputs.repository_name }}
+          tags: |
+            type=raw,value=${{ inputs.docker_version }}
+
+      - name: Generate Docker metadata for Docker Hub
+        id: meta-dockerhub
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.dockerhub_repository }}
+          tags: |
+            type=raw,value=${{ inputs.docker_version }}
+            type=raw,value=latest,enable=${{ inputs.is_latest }}
+
+      - name: Migrate Docker image
+        env:
+          DOCKER_METADATA_DOCKERHUB_OUTPUT_JSON: ${{ steps.meta-dockerhub.outputs.json }}
+        run: |
+          # Docker Hubにプッシュするタグを生成する
+          DOCKERHUB_TAG_ARGS=()
+          for TAG in $(jq -r '.tags[]' <<< "${DOCKER_METADATA_DOCKERHUB_OUTPUT_JSON}"); do
+            DOCKERHUB_TAG_ARGS+=(--tag "${TAG}")
+          done
+
+          # マニフェストリストをDocker Hubにコピー
+          docker buildx imagetools create \
+            "${DOCKERHUB_TAG_ARGS[@]}" \
+            "${{ steps.meta-ghcr.outputs.tags }}"
