@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           -
-            os: 'ubuntu-20.04'
+            os: 'ubuntu-22.04'
             sed: 'sed'
 
     runs-on: ${{ matrix.os }}
@@ -69,7 +69,7 @@ jobs:
       matrix:
         include:
           -
-            os: 'ubuntu-20.04'
+            os: 'ubuntu-22.04'
             artifact_name: matvtool
             asset_name: matvtool-linux-amd64
             sed: 'sed'

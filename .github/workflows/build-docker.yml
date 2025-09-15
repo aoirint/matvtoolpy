@@ -28,26 +28,26 @@ jobs:
           -
             docker_image_registry: 'ghcr.io'
             docker_cache_registry: 'ghcr.io'
-            base_image: 'ubuntu:20.04'
-            base_runtime_image: 'ubuntu:20.04'
+            base_image: 'ubuntu:22.04'
+            base_runtime_image: 'ubuntu:22.04'
             image_variant_name: 'ubuntu'
           -
             docker_image_registry: 'ghcr.io'
             docker_cache_registry: 'ghcr.io'
-            base_image: 'ubuntu:20.04'
-            base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
+            base_image: 'ubuntu:22.04'
+            base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu22.04'
             image_variant_name: 'nvidia'
           -
             docker_image_registry: 'docker.io'
             docker_cache_registry: 'ghcr.io'
-            base_image: 'ubuntu:20.04'
-            base_runtime_image: 'ubuntu:20.04'
+            base_image: 'ubuntu:22.04'
+            base_runtime_image: 'ubuntu:22.04'
             image_variant_name: 'ubuntu'
           -
             docker_image_registry: 'docker.io'
             docker_cache_registry: 'ghcr.io'
-            base_image: 'ubuntu:20.04'
-            base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu20.04'
+            base_image: 'ubuntu:22.04'
+            base_runtime_image: 'nvcr.io/nvidia/driver:510-signed-ubuntu22.04'
             image_variant_name: 'nvidia'
 
     runs-on: ubuntu-latest

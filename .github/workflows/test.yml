@@ -14,7 +14,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 'ubuntu-20.04'
+          # TODO: Ubuntu 24.04を追加
           - os: 'ubuntu-22.04'
 
     runs-on: ${{ matrix.os }}
