@@ -1,0 +1,85 @@
+# 実行可能ファイルをビルドしてGitHub Releaseにアップロードする
+name: Release Binary
+
+on:
+  workflow_call:
+    inputs:
+      app_version:
+        description: 'アプリケーションのバージョン（PEP 440）'
+        type: string
+        required: true
+      git_version:
+        description: 'Gitタグとしてのバージョン（edge または v{version}）'
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release-binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          -
+            os: 'ubuntu-22.04'
+            asset_name: matvtool-linux-amd64
+            sed: 'sed'
+          -
+            os: 'windows-2022'
+            asset_name: matvtool-windows-amd64.exe
+            sed: 'sed'
+          -
+            os: 'macos-14'
+            asset_name: matvtool-macos-amd64
+            sed: 'gsed'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.11'
+          enable-cache: true
+          cache-suffix: ${{ runner.os }}
+
+      - name: Install gsed for macOS
+        if: startsWith(matrix.os, 'macos-')
+        run: |
+          brew install gnu-sed
+
+      - name: Replace Version
+        run: |
+          ${{ matrix.sed }} -i "s/__version__ = \"0.0.0\"/__version__ = \"${{ inputs.app_version }}\"/" aoirint_matvtool/__init__.py
+          ${{ matrix.sed }} -i "s/version = \"0.0.0\"/version = \"${{ inputs.app_version }}\"/" pyproject.toml
+
+      - name: Install Python Dependencies
+        run: uv sync --all-groups
+
+      - name: Build Binary
+        env:
+          ASSET_NAME: ${{ matrix.asset_name }}
+        run: |
+          ASSET_NAME_STEM="${ASSET_NAME%.*}"
+          uv run pyinstaller --name "${ASSET_NAME_STEM}" --onefile "binary_entrypoint.py"
+
+      # リリースにバイナリをアップロード
+      - name: Upload Binary to Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.git_version }}
+          commit: ${{ github.sha }}
+          allowUpdates: true
+          omitNameDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          omitBodyDuringUpdate: true
+          artifacts: dist/${{ matrix.asset_name }}
