@@ -30,17 +30,6 @@ jobs:
       version: ${{ github.event.inputs.version }}
       is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
 
-  # GitHub ReleaseをDraftとして作成する
-  create-draft-release:
-    needs:
-      - generate-version
-    if: needs.generate-version.outputs.git_version != 'edge'
-    permissions:
-      contents: write
-    uses: ./.github/workflows/_create-draft-release.yml
-    with:
-      git_version: ${{ needs.generate-version.outputs.git_version }}
-
   # DockerイメージをビルドしてGitHub Container Registryにデプロイする
   build-docker-ghcr:
     needs:
@@ -53,6 +42,17 @@ jobs:
       docker_version: ${{ needs.generate-version.outputs.docker_version }}
       app_version: ${{ needs.generate-version.outputs.app_version }}
       is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
+
+  # GitHub ReleaseをDraftとして作成する
+  create-draft-release:
+    needs:
+      - generate-version
+    if: needs.generate-version.outputs.git_version != 'edge'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_create-draft-release.yml
+    with:
+      git_version: ${{ needs.generate-version.outputs.git_version }}
 
   # PythonパッケージをPyPIにリリースする
   release-pypi:
