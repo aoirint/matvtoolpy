@@ -13,7 +13,7 @@ permissions:
 
 env:
   VERSION: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || '0.0.0' }}
-  PYTHON_VERSION: '3.11.9'
+  PYTHON_VERSION: '3.11.13'
 
 jobs:
   release-pypi:

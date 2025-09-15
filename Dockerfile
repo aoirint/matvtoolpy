@@ -5,8 +5,8 @@ ARG BASE_RUNTIME_IMAGE=${BASE_IMAGE}
 FROM ${BASE_IMAGE} AS python-env
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PYENV_VERSION=v2.4.1
-ARG PYTHON_VERSION=3.11.9
+ARG PYENV_VERSION=v2.6.7
+ARG PYTHON_VERSION=3.11.13
 
 RUN <<EOF
     set -eu
@@ -77,7 +77,7 @@ EOF
 
 COPY --from=python-env /opt/python /opt/python
 
-ARG POETRY_VERSION=1.8.2
+ARG POETRY_VERSION=1.8.5
 RUN <<EOF
     set -eu
 
