@@ -6,7 +6,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from . import __VERSION__ as PACKAGE_VERSION
+from . import __version__ as APP_VERSION
 from . import config
 from .crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from .find_image import (
@@ -223,7 +223,7 @@ def command_find_image(args: Namespace) -> None:
 
                 if progress_type == "plain":
                     print(
-                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",  # noqa: B950
+                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",  # noqa: E501
                         file=sys.stderr,
                     )
 
@@ -254,7 +254,7 @@ def command_find_image(args: Namespace) -> None:
                         tqdm_pbar.clear()
 
                     print(
-                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: B950
+                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: E501
                     )
 
                     prev_input_timedelta = input_timedelta
@@ -333,7 +333,7 @@ def command_select_audio(args: Namespace) -> None:
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("-l", "--log_level", type=int, default=logging.INFO)
-    parser.add_argument("-v", "--version", action="version", version=PACKAGE_VERSION)
+    parser.add_argument("-v", "--version", action="version", version=APP_VERSION)
     parser.add_argument("--ffmpeg_path", type=str, default=config.FFMPEG_PATH)
     parser.add_argument("--ffprobe_path", type=str, default=config.FFPROBE_PATH)
 

@@ -1,0 +1,42 @@
+# GitHub ReleaseのDraftを解除して公開する
+name: Publish Release
+
+on:
+  workflow_call:
+    inputs:
+      git_version:
+        description: 'Gitタグとしてのバージョン（v{version}）'
+        type: string
+        required: true
+      is_latest:
+        description: '最新安定版かどうか（Prereleaseを解除してLatestにするか）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # リリースのDraftを解除して公開
+      - name: Publish Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.git_version }}
+          commit: ${{ github.sha }}
+          draft: false
+          prerelease: ${{ ! inputs.is_latest }}
+          makeLatest: ${{ inputs.is_latest }}
+          generateReleaseNotes: true
+          allowUpdates: true
+          omitNameDuringUpdate: false
+          omitDraftDuringUpdate: false
+          omitPrereleaseDuringUpdate: false
+          omitBodyDuringUpdate: false

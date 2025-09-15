@@ -7,7 +7,7 @@ A command line tool to handle a multi audio track video file.
 ## インストール
 
 基本的にFFmpegのラッパーです。別途FFmpegのインストールが必要です。
-FFmpeg 4.2（Ubuntu 20.04の標準バージョン）および4.4（Ubuntu 22.04の標準バージョン）をサポートしています。
+FFmpeg 4.4（Ubuntu 22.04の標準バージョン）をサポートしています。
 
 - <https://ffmpeg.org/download.html>
 
@@ -20,8 +20,8 @@ Pythonパッケージとして導入する場合、Python 3.11をサポートし
   - PyPI: <https://pypi.org/project/aoirint-matvtool/>
 - Dockerイメージ
   - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
-    - CPU: `docker run --rm -v "$PWD:/work" aoirint/matvtoolpy:ubuntu-latest --help`
-    - NVIDIA GPU: `docker run --rm --gpus all -v "$PWD:/work" aoirint/matvtoolpy:nvidia-latest --help`
+    - CPU: `docker run --rm -v ".:/work" -w "/work" aoirint/matvtoolpy --help`
+    - NVIDIA GPU: `docker run --rm --gpus 'all,"capabilities=video"' -v ".:/work" -w "/work" aoirint/matvtoolpy --help`
 
 ## 用途
 
@@ -115,10 +115,31 @@ Python 3.11を使って開発しています。
 
 ### 依存関係
 
-依存関係の管理に[Poetry](https://python-poetry.org/docs/#installation)を使っています。
+依存関係の管理に[uv](https://docs.astral.sh/uv/getting-started/installation/)を使っています。
 
 ```shell
 # Pythonパッケージを追加
-poetry add pydantic
-poetry add --group dev pytest
+uv add pydantic
+uv add --group dev pytest
 ```
+
+### コードフォーマット
+
+コードフォーマットには[Ruff](https://docs.astral.sh/ruff/)と[Mypy](https://www.mypy-lang.org)を使っています。
+
+```shell
+uv run ruff check --fix
+uv run ruff format
+
+uv run mypy .
+```
+
+## リリース手順
+
+1. [Actions](https://github.com/aoirint/matvtoolpy/actions)タブで、[Build Docker](https://github.com/aoirint/matvtoolpy/actions/workflows/build-docker.yml)を選択します。
+2. 「Run workflow」ボタンをクリックし、フォームにリリース設定を入力します。
+    - バージョンは`vX.Y.Z`形式で指定します。
+    - 変更をテストするためのビルドを作成する場合、`vX.Y.Z.dev0`のようなPEP 440形式の開発バージョンを使用します。バージョン文字列はDockerイメージのタグの一部として有効な形式である必要があります。
+    - 最新安定版としてリリースする場合は「最新安定版かどうか」にチェックを入れます。`main`ブランチでのリリース時は、原則として最新安定版とします。
+3. フォーム内の「Run workflow」ボタンをクリックし、ワークフローを実行します。
+    - ワークフローによりGitHub Releaseが作成され、ghcrへDockerイメージがプッシュされます。

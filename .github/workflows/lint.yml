@@ -1,0 +1,66 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.11'
+          enable-cache: true
+          cache-suffix: ${{ runner.os }}
+
+      - name: Install Python Dependencies
+        run: uv sync --all-groups
+
+      # 以降のステップが失敗してもキャッシュを保持するため、明示的にキャッシュを復元する
+      - name: Restore Lint cache
+        id: cache-lint-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .ruff_cache
+            .mypy_cache
+          key: ${{ runner.os }}-lint-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-lint-
+
+      # リンターチェック
+      - name: Run Ruff lint check
+        run: uv run ruff check
+
+      # フォーマットチェック
+      - name: Run Ruff format check
+        run: uv run ruff format --check
+
+      # 型チェック
+      - name: Run mypy
+        run: uv run mypy .
+
+      # Lintが失敗してもキャッシュを保存する
+      - name: Save Lint cache
+        id: cache-lint-save
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            .ruff_cache
+            .mypy_cache
+          key: ${{ runner.os }}-lint-${{ github.sha }}

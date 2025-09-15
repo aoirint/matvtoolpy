@@ -1,121 +1,69 @@
-# syntax=docker/dockerfile:1.6
-ARG BASE_IMAGE=ubuntu:20.04
-ARG BASE_RUNTIME_IMAGE=${BASE_IMAGE}
+# syntax=docker/dockerfile:1
+ARG PYTHON_IMAGE=python:3.11
 
-FROM ${BASE_IMAGE} AS python-env
+FROM "${PYTHON_IMAGE}" AS build-venv
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PYENV_VERSION=v2.4.1
-ARG PYTHON_VERSION=3.11.9
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+COPY --from=ghcr.io/astral-sh/uv:0.8 /uv /uvx /bin/
+
+# uvの動作設定
+# - バイトコードを生成
+# - 仮想環境にパッケージの実体をコピー
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+
+# Python仮想環境を作成して、依存関係をインストール
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=./uv.lock,target=/opt/aoirint_matvtool/uv.lock \
+    --mount=type=bind,source=./pyproject.toml,target=/opt/aoirint_matvtool/pyproject.toml <<EOF
+    cd /opt/aoirint_matvtool
+
+    UV_PROJECT_ENVIRONMENT="/opt/python_venv" uv sync --locked --no-dev --no-editable --no-install-project
+EOF
+
+# アプリケーションのソースコードを追加
+COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
+
+# Python仮想環境にPATHを通す
+ENV PATH="/opt/python_venv/bin:${PATH}"
+
+# アプリケーションのソースコードを追加
+COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
+
+# バージョンを置換して、アプリケーションをパッケージとしてインストール
+ARG APP_VERSION="0.0.0"
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=./uv.lock,target=/opt/aoirint_matvtool/uv.lock \
+    --mount=type=bind,source=./pyproject.toml,target=/opt/aoirint_matvtool/pyproject.toml <<EOF
+    cd /opt/aoirint_matvtool
+
+    sed -i "s/__version__ = \"0.0.0\"/__version__ = \"${APP_VERSION}\"/" ./aoirint_matvtool/__init__.py
+
+    UV_PROJECT_ENVIRONMENT="/opt/python_venv" uv sync --locked --no-dev --no-editable
+EOF
+
+FROM "${PYTHON_IMAGE}" AS runtime
+
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOF
     set -eu
 
     apt-get update
 
-    apt-get install -y \
-        make \
-        build-essential \
-        libssl-dev \
-        zlib1g-dev \
-        libbz2-dev \
-        libreadline-dev \
-        libsqlite3-dev \
-        wget \
-        curl \
-        llvm \
-        libncursesw5-dev \
-        xz-utils \
-        tk-dev \
-        libxml2-dev \
-        libxmlsec1-dev \
-        libffi-dev \
-        liblzma-dev \
-        git
-
-    apt-get clean
-    rm -rf /var/lib/apt/lists/*
-EOF
-
-RUN <<EOF
-    set -eu
-
-    git clone https://github.com/pyenv/pyenv.git /opt/pyenv
-    cd /opt/pyenv
-    git checkout "${PYENV_VERSION}"
-
-    PREFIX=/opt/python-build /opt/pyenv/plugins/python-build/install.sh
-    /opt/python-build/bin/python-build -v "${PYTHON_VERSION}" /opt/python
-
-    rm -rf /opt/python-build /opt/pyenv
-EOF
-
-
-FROM ${BASE_RUNTIME_IMAGE} AS runtime-env
-
-ARG DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
-ENV PATH=/home/user/.local/bin:/opt/python/bin:${PATH}
-
-RUN <<EOF
-    set -eu
-
-    apt-get update
-    apt-get install -y \
-        gosu \
+    apt-get install -y --no-install-recommends \
         ffmpeg
+
     apt-get clean
     rm -rf /var/lib/apt/lists/*
 EOF
 
-RUN <<EOF
-    set -eu
+COPY --from=build-venv /opt/python_venv /opt/python_venv
+ENV PATH="/opt/python_venv/bin:${PATH}"
 
-    groupadd --non-unique --gid 1000 user
-    useradd --non-unique --uid 1000 --gid 1000 --create-home user
-EOF
+USER "1000:1000"
 
-COPY --from=python-env /opt/python /opt/python
-
-ARG POETRY_VERSION=1.8.2
-RUN <<EOF
-    set -eu
-
-    gosu user pip install "poetry==${POETRY_VERSION}"
-
-    gosu user poetry config virtualenvs.in-project true
-
-    mkdir -p /home/user/.cache/pypoetry/{cache,artifacts}
-    chown -R "user:user" /home/user/.cache
-EOF
-
-RUN <<EOF
-    set -eu
-
-    mkdir -p /code/matvtoolpy
-    chown -R "user:user" /code/matvtoolpy
-EOF
-
-ADD ./pyproject.toml ./poetry.lock /code/matvtoolpy/
-RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache \
-    --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/artifacts <<EOF
-    set -eu
-
-    cd /code/matvtoolpy
-    gosu user poetry install --no-root --only main
-EOF
-
-ENV PATH=/code/matvtoolpy/.venv/bin:${PATH}
-ADD ./aoirint_matvtool /code/matvtoolpy/aoirint_matvtool
-ADD ./README.md /code/matvtoolpy/
-
-RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/cache \
-    --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/pypoetry/artifacts <<EOF
-    set -eu
-
-    cd /code/matvtoolpy
-    gosu user poetry install --only main
-EOF
-
-WORKDIR /work
-ENTRYPOINT [ "gosu", "user", "matvtool" ]
+ENTRYPOINT [ "matvtool" ]

@@ -1,11 +1,12 @@
 import contextlib
+from collections.abc import Generator
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Generator
 from unittest import TestCase
 
 import cv2
 import numpy as np
+
 from aoirint_matvtool.fps import ffmpeg_fps
 
 fourcc = cv2.VideoWriter.fourcc(*"mp4v")

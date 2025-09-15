@@ -1,0 +1,105 @@
+# 用途に応じたバージョン文字列を生成する
+name: Generate Version
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'バージョン（edge または v{version}）'
+        type: string
+        required: true
+      is_latest:
+        description: '最新安定版かどうか（latestタグをプッシュするか）'
+        type: boolean
+        default: false
+    outputs:
+      docker_version:
+        description: 'Dockerイメージのバージョン（edge または v{version}）'
+        value: ${{ jobs.generate-version.outputs.docker_version }}
+      app_version:
+        description: 'アプリケーションのバージョン（PEP 440）'
+        value: ${{ jobs.generate-version.outputs.app_version }}
+      git_version:
+        description: 'Gitタグとしてのバージョン（edge または v{version}）'
+        value: ${{ jobs.generate-version.outputs.git_version }}
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate-version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      docker_version: ${{ steps.generate-docker-version.outputs.version }}
+      app_version: ${{ steps.generate-app-version.outputs.app_version }}
+      git_version: ${{ steps.generate-git-version.outputs.version }}
+
+    steps:
+      # Dockerイメージのタグとして使用するバージョンを生成
+      - name: Generate Docker version
+        id: generate-docker-version
+        run: |
+          # mainブランチにコミットがプッシュされた: edge
+          # v{version}形式のタグがプッシュされた: v{version}
+          # workflow_dispatchイベントでトリガーされた: inputs.version
+
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            if [ "${GITHUB_REF}" = "${{ format('refs/heads/{0}', 'main') }}" ]; then
+              echo "version=edge" >> "${GITHUB_OUTPUT}"
+
+            elif [[ "${GITHUB_REF}" =~ ^refs/tags/v.+$ ]]; then
+              echo "version=${GITHUB_REF#refs/tags/}" >> "${GITHUB_OUTPUT}"
+
+            else
+              echo "Unsupported ref: ${GITHUB_REF}"
+              exit 1
+            fi
+
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.version }}" = "edge" ]; then
+              echo "version=edge" >> "${GITHUB_OUTPUT}"
+
+            elif [[ "${{ inputs.version }}" =~ ^v.+$ ]]; then
+              echo "version=${{ inputs.version }}" >> "${GITHUB_OUTPUT}"
+
+            else
+              echo "Invalid version format: ${{ inputs.version }}"
+              exit 1
+            fi
+
+          else
+            echo "Unsupported event: ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+
+      # アプリケーション内のバージョン情報として使用するバージョンを生成
+      - name: Generate app version
+        id: generate-app-version
+        run: |
+          # mainブランチにコミットがプッシュされた: 0.0.0.dev+edge.{date}.{short_sha}
+          # v{version}形式のタグがプッシュされた: {version}
+
+          DATE_STRING=$(date -u "+%Y-%m-%dT%H-%M-%SZ")
+          SHA_SHORT="${GITHUB_SHA:0:7}"
+
+          DOCKER_VERSION="${{ steps.generate-docker-version.outputs.version }}"
+          if [ "${DOCKER_VERSION}" = "edge" ]; then
+            APP_VERSION="0.0.0.dev+edge.${DATE_STRING}.${SHA_SHORT}"
+          elif [[ "${DOCKER_VERSION}" =~ ^v.+$ ]]; then
+            APP_VERSION="${DOCKER_VERSION:1}"
+          else
+            echo "Invalid docker version format: ${DOCKER_VERSION}"
+            exit 1
+          fi
+
+          echo "app_version=${APP_VERSION}" >> "${GITHUB_OUTPUT}"
+
+      # Gitタグとして使用するバージョンを生成
+      - name: Generate git version
+        id: generate-git-version
+        run: |
+          echo "version=${{ steps.generate-docker-version.outputs.version }}" >> "${GITHUB_OUTPUT}"

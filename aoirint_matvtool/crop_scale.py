@@ -1,7 +1,7 @@
 import re
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional, Union
 
 from pydantic import BaseModel
 
@@ -12,16 +12,16 @@ from .util import exclude_none
 
 class FfmpegCropScaleResult(BaseModel):
     success: bool
-    message: Optional[str]
+    message: str | None
 
 
 def ffmpeg_crop_scale(
     input_path: Path,
-    crop: Optional[str],
-    scale: Optional[str],
-    video_codec: Optional[str],
+    crop: str | None,
+    scale: str | None,
+    video_codec: str | None,
     output_path: Path,
-) -> Iterable[Union[FfmpegCropScaleResult, FfmpegProgressLine]]:
+) -> Iterable[FfmpegCropScaleResult | FfmpegProgressLine]:
     # TODO: quality control
     if crop is not None and "," in crop:
         raise ValueError("Invalid crop argument. Remove ',' from crop.")
