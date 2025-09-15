@@ -45,7 +45,6 @@ jobs:
   build-docker-ghcr:
     needs:
       - generate-version
-      - create-draft-release
     permissions:
       contents: read
       packages: write
@@ -59,7 +58,6 @@ jobs:
   release-pypi:
     needs:
       - generate-version
-      - create-draft-release
     if: needs.generate-version.outputs.git_version != 'edge'
     permissions:
       contents: read
