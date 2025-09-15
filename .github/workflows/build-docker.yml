@@ -16,7 +16,6 @@ env:
   VERSION: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || '0.0.0' }}
   IMAGE_NAME: aoirint/matvtoolpy
   IMAGE_VERSION_NAME: ${{ (github.event.release.tag_name != '' && github.event.release.tag_name) || 'latest' }}
-  PYTHON_VERSION: '3.11.13'
 
 defaults:
   run:
@@ -79,11 +78,6 @@ jobs:
           registry: 'docker.io'
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Replace Version
-        run: |
-          sed -i "s/__VERSION__ = \"0.0.0\"/__VERSION__ = \"${{ env.VERSION }}\"/" aoirint_matvtool/__init__.py
-          sed -i "s/version = \"0.0.0\"/version = \"${{ env.VERSION }}\"/" pyproject.toml
 
       - name: Build and Deploy Docker image
         uses: docker/build-push-action@v5
