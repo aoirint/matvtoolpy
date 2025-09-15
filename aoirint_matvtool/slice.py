@@ -2,7 +2,6 @@ import re
 import subprocess
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -13,7 +12,7 @@ from . import config
 
 class FfmpegSliceResult(BaseModel):
     success: bool
-    message: Optional[str]
+    message: str | None
 
 
 def ffmpeg_slice(
@@ -21,7 +20,7 @@ def ffmpeg_slice(
     to: str,
     input_path: Path,
     output_path: Path,
-) -> Iterable[Union[FfmpegSliceResult, FfmpegProgressLine]]:
+) -> Iterable[FfmpegSliceResult | FfmpegProgressLine]:
     command = [
         config.FFMPEG_PATH,
         "-hide_banner",

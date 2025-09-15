@@ -15,34 +15,40 @@ select = [
 [tool.mypy]
 strict = true
 
-[tool.poetry]
+[tool.uv]
+package = true
+
+[project]
 name = "aoirint-matvtool"
 version = "0.0.0"
 description = "A command line tool to handle a multi audio track video file"
-authors = ["aoirint <aoirint@gmail.com>"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/aoirint/matvtoolpy"
-packages = [{include = "aoirint_matvtool"}]
+maintainers = [
+  {name = "aoirint", email = "aoirint@gmail.com"},
+]
+authors = [
+  {name = "aoirint", email = "aoirint@gmail.com"},
+]
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.11.9",
+    "tqdm>=4.67.1",
+]
 
-[tool.poetry.scripts]
+[project.urls]
+Repository = "https://github.com/aoirint/matvtoolpy"
+
+[project.scripts]
 matvtool = "aoirint_matvtool.cli:main"
 
-[tool.poetry.dependencies]
-python = "~3.11"
-pydantic = "^2.7.1"
-tqdm = "^4.66.4"
-
-
-[tool.poetry.group.dev.dependencies]
-types-tqdm = "^4.66.0.20240417"
-numpy = "^1.26.4"
-opencv-python = "^4.9.0.80"
-pyinstaller = "^6.7.0"
-ruff = "^0.13.0"
-mypy = "^1.18.1"
-pytest = "^8.4.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "mypy>=1.18.1",
+    "numpy>=2.3.3",
+    "opencv-python>=4.11.0.86",
+    "pyinstaller>=6.16.0",
+    "pytest>=8.4.2",
+    "ruff>=0.13.0",
+    "types-tqdm>=4.67.0.20250809",
+]

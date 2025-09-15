@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from datetime import timedelta
 from math import log10
 from pathlib import Path
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ from .key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
 T = TypeVar("T")
 
 
-def exclude_none(iterable: Iterable[Optional[T]]) -> Iterable[T]:
+def exclude_none(iterable: Iterable[T | None]) -> Iterable[T]:
     """
     Type-safe exclusion function for None
     """
@@ -96,7 +96,7 @@ def parse_ffmpeg_time_unit_syntax(string: str) -> FfmpegTimeUnitSyntax:
 
 def get_real_start_timedelta_by_ss(
     video_path: Path,
-    ss: Optional[str],
+    ss: str | None,
 ) -> timedelta:
     """
     ssオプションから実時間での開始時間を計算

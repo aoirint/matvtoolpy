@@ -6,7 +6,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from . import __VERSION__ as PACKAGE_VERSION
+from . import __version__ as APP_VERSION
 from . import config
 from .crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from .find_image import (
@@ -333,7 +333,7 @@ def command_select_audio(args: Namespace) -> None:
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("-l", "--log_level", type=int, default=logging.INFO)
-    parser.add_argument("-v", "--version", action="version", version=PACKAGE_VERSION)
+    parser.add_argument("-v", "--version", action="version", version=APP_VERSION)
     parser.add_argument("--ffmpeg_path", type=str, default=config.FFMPEG_PATH)
     parser.add_argument("--ffprobe_path", type=str, default=config.FFPROBE_PATH)
 
