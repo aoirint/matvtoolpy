@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       git_version:
-        description: 'Gitタグとしてのバージョン（edge または v{version}）'
+        description: 'Gitタグとしてのバージョン（v{version}）'
         type: string
         required: true
 
@@ -37,8 +37,4 @@ jobs:
             **Do not make manual changes until the process has finished.**
 
             👉 You can track the progress here: [View GitHub Actions Run](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
-          allowUpdates: true
-          omitNameDuringUpdate: true
-          omitDraftDuringUpdate: true
-          omitPrereleaseDuringUpdate: true
-          omitBodyDuringUpdate: true
+          allowUpdates: false

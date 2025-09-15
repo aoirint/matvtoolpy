@@ -5,13 +5,13 @@ on:
   workflow_call:
     inputs:
       git_version:
-        description: 'Gitタグとしてのバージョン（edge または v{version}）'
+        description: 'Gitタグとしてのバージョン（v{version}）'
         type: string
         required: true
       is_latest:
         description: '最新安定版かどうか（Prereleaseを解除してLatestにするか）'
         type: boolean
-        default: true
+        default: false
 
 permissions:
   contents: write
@@ -36,7 +36,7 @@ jobs:
           makeLatest: ${{ inputs.is_latest }}
           generateReleaseNotes: true
           allowUpdates: true
-          omitNameDuringUpdate: true
+          omitNameDuringUpdate: false
           omitDraftDuringUpdate: false
           omitPrereleaseDuringUpdate: false
-          omitBodyDuringUpdate: true
+          omitBodyDuringUpdate: false

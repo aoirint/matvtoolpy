@@ -34,6 +34,7 @@ jobs:
   create-draft-release:
     needs:
       - generate-version
+    if: needs.generate-version.outputs.git_version != 'edge'
     permissions:
       contents: write
     uses: ./.github/workflows/_create-draft-release.yml
@@ -59,6 +60,7 @@ jobs:
     needs:
       - generate-version
       - create-draft-release
+    if: needs.generate-version.outputs.git_version != 'edge'
     permissions:
       contents: read
     uses: ./.github/workflows/_release-pypi.yml
@@ -70,6 +72,7 @@ jobs:
     needs:
       - generate-version
       - create-draft-release
+    if: needs.generate-version.outputs.git_version != 'edge'
     permissions:
       contents: write
     uses: ./.github/workflows/_release-binary.yml
@@ -84,6 +87,7 @@ jobs:
       - build-docker-ghcr
       - release-pypi
       - release-binary
+    if: needs.generate-version.outputs.git_version != 'edge'
     permissions:
       contents: write
     uses: ./.github/workflows/_publish-release.yml
