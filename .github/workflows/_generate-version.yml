@@ -1,12 +1,8 @@
-name: Build Docker
+# 用途に応じたバージョン文字列を生成する
+name: Generate Version
 
 on:
-  push:
-    branches:
-      - 'main'
-    tags:
-      - 'v*'
-  workflow_dispatch:
+  workflow_call:
     inputs:
       version:
         description: 'バージョン（edge または v{version}）'
@@ -16,25 +12,34 @@ on:
         description: '最新安定版かどうか（latestタグをプッシュするか）'
         type: boolean
         default: false
+    outputs:
+      docker_version:
+        description: 'Dockerイメージのバージョン（edge または v{version}）'
+        value: ${{ jobs.generate-version.outputs.docker_version }}
+      app_version:
+        description: 'アプリケーションのバージョン（PEP 440）'
+        value: ${{ jobs.generate-version.outputs.app_version }}
+      git_version:
+        description: 'Gitタグとしてのバージョン（edge または v{version}）'
+        value: ${{ jobs.generate-version.outputs.git_version }}
+
+permissions: {}
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  # Dockerイメージのバージョンとアプリケーションのバージョンを生成する
-  config:
+  generate-version:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     outputs:
       docker_version: ${{ steps.generate-docker-version.outputs.version }}
       app_version: ${{ steps.generate-app-version.outputs.app_version }}
+      git_version: ${{ steps.generate-git-version.outputs.version }}
 
     steps:
-      # Dockerイメージとしてのバージョンを生成
+      # Dockerイメージのタグとして使用するバージョンを生成
       - name: Generate Docker version
         id: generate-docker-version
         run: |
@@ -71,7 +76,7 @@ jobs:
             exit 1
           fi
 
-      # アプリケーションとしてのバージョンを生成
+      # アプリケーション内のバージョン情報として使用するバージョンを生成
       - name: Generate app version
         id: generate-app-version
         run: |
@@ -93,29 +98,8 @@ jobs:
 
           echo "app_version=${APP_VERSION}" >> "${GITHUB_OUTPUT}"
 
-      # workflow_dispatchイベントでトリガーされた場合、リリースを作成
-      - name: Create Release
-        if: github.event_name == 'workflow_dispatch'
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.generate-docker-version.outputs.version }}
-          commit: ${{ github.sha }}
-          prerelease: true
-          generateReleaseNotes: true
-          allowUpdates: true
-          omitNameDuringUpdate: true
-          omitDraftDuringUpdate: true
-          omitPrereleaseDuringUpdate: true
-          omitBodyDuringUpdate: true
-
-  # DockerイメージをビルドしてGitHub Container Registryにデプロイする
-  build-docker-ghcr:
-    needs: [config]
-    permissions:
-      contents: read
-      packages: write
-    uses: ./.github/workflows/build-docker-ghcr.yml
-    with:
-      docker_version: ${{ needs.config.outputs.docker_version }}
-      app_version: ${{ needs.config.outputs.app_version }}
-      is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
+      # Gitタグとして使用するバージョンを生成
+      - name: Generate git version
+        id: generate-git-version
+        run: |
+          echo "version=${{ steps.generate-docker-version.outputs.version }}" >> "${GITHUB_OUTPUT}"
