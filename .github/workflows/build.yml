@@ -43,6 +43,22 @@ jobs:
       app_version: ${{ needs.generate-version.outputs.app_version }}
       is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
 
+  # DockerイメージをビルドしてDocker Hubにデプロイする
+  build-docker-dockerhub:
+    needs:
+      - generate-version
+      - build-docker-ghcr
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/_build-docker-dockerhub.yml
+    with:
+      dockerhub_repository: ${{ vars.DOCKERHUB_REPOSITORY }}
+      docker_version: ${{ needs.generate-version.outputs.docker_version }}
+      is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
   # GitHub ReleaseをDraftとして作成する
   create-draft-release:
     needs:
