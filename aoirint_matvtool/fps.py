@@ -19,7 +19,7 @@ def ffmpeg_fps(input_path: Path) -> FfmpegFpsResult:
     input_video_track = next(
         filter(lambda track: track.type == "Video", input_video.streams[0].tracks)
     )
-    # h264 (High), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 60 fps, 60 tbr, 1k tbn, 120 tbc (default)  # noqa: B950
+    # h264 (High), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 60 fps, 60 tbr, 1k tbn, 120 tbc (default)  # noqa: E501
     input_video_track_text = input_video_track.text
     match = re.search(r"(\d+)(\.\d+)?\ fps", input_video_track_text)
 

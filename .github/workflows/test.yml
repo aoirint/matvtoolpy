@@ -3,40 +3,14 @@ name: Test
 on:
   push:
     branches:
-      - main
-  release:
-    types:
-      - created
+      - "main"
   pull_request:
-
-env:
-  PYTHON_VERSION: '3.11.13'
+    branches:
+      - "main"
+  workflow_dispatch:
 
 jobs:
-  lint:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Poetry
-        shell: bash
-        run: pipx install poetry
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'poetry'
-
-      - name: Install Dependencies
-        shell: bash
-        run: poetry install
-
-      - name: Run lint
-        run: poetry run pysen run lint
-
-  pytest:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -54,23 +28,23 @@ jobs:
         run: pipx install poetry
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: '3.11'
           cache: 'poetry'
 
       - name: Install Dependencies
         shell: bash
-        run: poetry install
+        run: poetry sync
 
       - name: Install FFmpeg
         run: |
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: FFmpeg Version
         run: |
-            ffmpeg -version
+          ffmpeg -version
 
       - name: Run pytest
         run: poetry run pytest tests/

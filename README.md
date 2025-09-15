@@ -122,3 +122,14 @@ Python 3.11を使って開発しています。
 poetry add pydantic
 poetry add --group dev pytest
 ```
+
+### コードフォーマット
+
+コードフォーマットには[Ruff](https://docs.astral.sh/ruff/)と[Mypy](https://www.mypy-lang.org)を使っています。
+
+```shell
+poetry run ruff check --fix
+poetry run ruff format
+
+poetry run mypy .
+```

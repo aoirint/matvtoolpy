@@ -1,10 +1,12 @@
 import re
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional, Union
+from typing import Optional, Union
+
+from pydantic import BaseModel
 
 from aoirint_matvtool.find_image import FfmpegProgressLine
-from pydantic import BaseModel
 
 from . import config
 

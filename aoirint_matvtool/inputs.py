@@ -1,7 +1,6 @@
 import re
 import subprocess
 from pathlib import Path
-from typing import List
 
 from pydantic import BaseModel
 
@@ -18,23 +17,23 @@ class FfmpegTrack(BaseModel):
     index: int
     type: str
     text: str
-    metadatas: List[FfmpegMetadataItem]
+    metadatas: list[FfmpegMetadataItem]
 
 
 class FfmpegStream(BaseModel):
     index: int
-    tracks: List[FfmpegTrack]
+    tracks: list[FfmpegTrack]
 
 
 class FfmpegInput(BaseModel):
     index: int
     text: str
-    streams: List[FfmpegStream]
-    metadatas: List[FfmpegMetadataItem]
+    streams: list[FfmpegStream]
+    metadatas: list[FfmpegMetadataItem]
 
 
-def __find_all_input_line_index(lines: List[str]) -> List[int]:
-    indexes: List[int] = []
+def __find_all_input_line_index(lines: list[str]) -> list[int]:
+    indexes: list[int] = []
 
     for line_index, line in enumerate(lines):
         match = re.search(r"^Input #.+$", line)
@@ -44,8 +43,8 @@ def __find_all_input_line_index(lines: List[str]) -> List[int]:
     return indexes
 
 
-def __find_all_stream_line_index(lines: List[str]) -> List[int]:
-    indexes: List[int] = []
+def __find_all_stream_line_index(lines: list[str]) -> list[int]:
+    indexes: list[int] = []
 
     for line_index, line in enumerate(lines):
         # FFmpeg 4.2: indent level 4
@@ -57,10 +56,10 @@ def __find_all_stream_line_index(lines: List[str]) -> List[int]:
     return indexes
 
 
-def __find_all_metadata_line_index(lines: List[str], level: int) -> List[int]:
+def __find_all_metadata_line_index(lines: list[str], level: int) -> list[int]:
     indent = " " * level
 
-    indexes: List[int] = []
+    indexes: list[int] = []
 
     for line_index, line in enumerate(lines):
         match = re.search(r"^" + indent + r"Metadata:", line)
@@ -71,14 +70,14 @@ def __find_all_metadata_line_index(lines: List[str], level: int) -> List[int]:
 
 
 def __read_first_metadata_items(
-    lines: List[str], level: int
-) -> List[FfmpegMetadataItem]:
+    lines: list[str], level: int
+) -> list[FfmpegMetadataItem]:
     metadata_line_indexes = __find_all_metadata_line_index(lines=lines, level=level)
     assert len(metadata_line_indexes) != 0
 
     indent = " " * (level + 2)
 
-    metadatas: List[FfmpegMetadataItem] = []
+    metadatas: list[FfmpegMetadataItem] = []
 
     metadata_line_index = metadata_line_indexes[0]
     metadata_line_index_end = len(lines)
@@ -108,7 +107,7 @@ def ffmpeg_get_input(input_path: Path) -> FfmpegInput:
 
     lines = stderr.splitlines()
 
-    inputs: List[FfmpegInput] = []
+    inputs: list[FfmpegInput] = []
 
     input_line_indexes = __find_all_input_line_index(lines=lines)
     for input_index, input_line_index in enumerate(input_line_indexes):
@@ -136,7 +135,7 @@ def ffmpeg_get_input(input_path: Path) -> FfmpegInput:
         )
         logger.debug(f"Input Metadatas {input_metadatas}")
 
-        streams: List[FfmpegStream] = []
+        streams: list[FfmpegStream] = []
 
         for stream_index, stream_line_index in enumerate(stream_line_indexes):
             stream_line_index_end = (
@@ -161,7 +160,8 @@ def ffmpeg_get_input(input_path: Path) -> FfmpegInput:
             stream_type = match_stream.group(3)
             stream_text = match_stream.group(4)
             logger.debug(
-                f"Stream Track {stream_index} {stream_track_index} {stream_type} {stream_text}"
+                f"Stream Track {stream_index} {stream_track_index} "
+                f"{stream_type} {stream_text}"
             )
 
             stream_lines = input_lines[stream_line_index + 1 : stream_line_index_end]

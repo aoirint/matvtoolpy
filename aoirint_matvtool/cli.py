@@ -223,7 +223,7 @@ def command_find_image(args: Namespace) -> None:
 
                 if progress_type == "plain":
                     print(
-                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",  # noqa: B950
+                        f"Progress | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})",  # noqa: E501
                         file=sys.stderr,
                     )
 
@@ -254,7 +254,7 @@ def command_find_image(args: Namespace) -> None:
                         tqdm_pbar.clear()
 
                     print(
-                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: B950
+                        f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: E501
                     )
 
                     prev_input_timedelta = input_timedelta
