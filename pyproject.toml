@@ -15,6 +15,9 @@ select = [
 [tool.mypy]
 strict = true
 
+[tool.uv]
+package = true
+
 [project]
 name = "aoirint-matvtool"
 version = "0.0.0"

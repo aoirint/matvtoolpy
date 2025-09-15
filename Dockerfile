@@ -23,6 +23,27 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     UV_PROJECT_ENVIRONMENT="/opt/python_venv" uv sync --locked --no-dev --no-editable --no-install-project
 EOF
 
+# アプリケーションのソースコードを追加
+COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
+
+# Python仮想環境にPATHを通す
+ENV PATH="/opt/python_venv/bin:${PATH}"
+
+# アプリケーションのソースコードを追加
+COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
+
+# バージョンを置換して、アプリケーションをパッケージとしてインストール
+ARG APP_VERSION="0.0.0"
+COPY ./pyproject.toml /opt/aoirint_matvtool/pyproject.toml
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=./uv.lock,target=/opt/aoirint_matvtool/uv.lock <<EOF
+    cd /opt/aoirint_matvtool
+
+    sed -i "s/__version__ = \"0.0.0\"/__version__ = \"${APP_VERSION}\"/" ./aoirint_matvtool/__init__.py
+
+    UV_PROJECT_ENVIRONMENT="/opt/python_venv" uv sync --locked --no-dev --no-editable
+EOF
+
 FROM "${PYTHON_IMAGE}" AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -42,19 +63,6 @@ EOF
 
 COPY --from=build-venv /opt/python_venv /opt/python_venv
 ENV PATH="/opt/python_venv/bin:${PATH}"
-
-# アプリケーションのソースコードを追加
-COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
-
-# バージョンを置換・バイトコードをコンパイル
-ARG APP_VERSION="0.0.0"
-RUN <<EOF
-    cd /opt/aoirint_matvtool
-
-    sed -i "s/__version__ = \"0.0.0\"/__version__ = \"${APP_VERSION}\"/" ./aoirint_matvtool/__init__.py
-
-    python -m compileall ./aoirint_matvtool
-EOF
 
 USER "1000:1000"
 
