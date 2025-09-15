@@ -21,7 +21,7 @@ Pythonパッケージとして導入する場合、Python 3.11をサポートし
 - Dockerイメージ
   - Docker Hub: <https://hub.docker.com/r/aoirint/matvtoolpy>
     - CPU: `docker run --rm -v ".:/work" aoirint/matvtoolpy:ubuntu-latest --help`
-    - NVIDIA GPU: - NVIDIA GPU: `docker run --rm --gpus all -v ".:/work" aoirint/matvtoolpy:nvidia-latest --help`
+    - NVIDIA GPU: `docker run --rm --gpus all -v ".:/work" aoirint/matvtoolpy:nvidia-latest --help`
 
 ## 用途
 
