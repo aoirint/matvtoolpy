@@ -58,7 +58,7 @@ jobs:
       - name: Build Package
         run: uv build
 
-      # TODO: PyPIでReusable workflowをTrusted publisherとして利用できるようになったら、Trusted Publishingに移行したい
+      # TODO: PyPIでReusable workflowをTrusted publisherとして利用できるようになったら、Trusted Publishingに移行したい: https://github.com/aoirint/matvtoolpy/issues/103
       - name: Publish Package
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
