@@ -74,7 +74,7 @@ jobs:
             asset_name: matvtool-linux-amd64
             sed: 'sed'
           -
-            os: 'windows-2019'
+            os: 'windows-2022'
             artifact_name: matvtool.exe
             asset_name: matvtool-windows-amd64.exe
             sed: 'sed'
