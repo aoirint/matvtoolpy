@@ -6,7 +6,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from . import __VERSION__ as PACKAGE_VERSION
+from . import __version__ as PACKAGE_VERSION
 from . import config
 from .crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from .find_image import (

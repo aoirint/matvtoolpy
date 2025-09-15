@@ -34,9 +34,9 @@ COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
 
 # バージョンを置換して、アプリケーションをパッケージとしてインストール
 ARG APP_VERSION="0.0.0"
-COPY ./pyproject.toml /opt/aoirint_matvtool/pyproject.toml
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=./uv.lock,target=/opt/aoirint_matvtool/uv.lock <<EOF
+    --mount=type=bind,source=./uv.lock,target=/opt/aoirint_matvtool/uv.lock \
+    --mount=type=bind,source=./pyproject.toml,target=/opt/aoirint_matvtool/pyproject.toml <<EOF
     cd /opt/aoirint_matvtool
 
     sed -i "s/__version__ = \"0.0.0\"/__version__ = \"${APP_VERSION}\"/" ./aoirint_matvtool/__init__.py
