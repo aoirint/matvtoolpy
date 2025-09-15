@@ -27,8 +27,8 @@ jobs:
     permissions: {}
     uses: ./.github/workflows/_generate-version.yml
     with:
-      version: ${{ inputs.version }}
-      is_latest: ${{ inputs.is_latest }} 
+      version: ${{ github.event.inputs.version }}
+      is_latest: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.is_latest == 'true' }}
 
   # GitHub Releaseを作成する
   create-release:
