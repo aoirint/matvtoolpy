@@ -1,7 +1,8 @@
 import re
 import subprocess
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -77,11 +78,11 @@ def ffmpeg_find_image_generator(
         )
 
     # Create the blend filter_complex string
-    blend_filter_complex_inner_string = f"blend=difference:shortest=1,blackframe=amount={blackframe_amount}:threshold={blackframe_threshold}"  # noqa: B950
+    blend_filter_complex_inner_string = f"blend=difference:shortest=1,blackframe=amount={blackframe_amount}:threshold={blackframe_threshold}"  # noqa: E501
     blend_input_a_name = "va" if input_video_filter_complex is not None else "0:v"
     blend_input_b_name = "vb" if input_video_filter_complex is not None else "1:v"
 
-    blend_filter_complex = f"[{blend_input_a_name}][{blend_input_b_name}]{blend_filter_complex_inner_string}"  # noqa: B950
+    blend_filter_complex = f"[{blend_input_a_name}][{blend_input_b_name}]{blend_filter_complex_inner_string}"  # noqa: E501
 
     # Create the filter_complex string
     filter_complex_filters = list(

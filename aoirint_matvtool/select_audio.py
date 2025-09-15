@@ -1,7 +1,8 @@
 import re
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -16,7 +17,7 @@ class FfmpegSelectAudioResult(BaseModel):
 
 def ffmpeg_select_audio(
     input_path: Path,
-    audio_indexes: List[int],
+    audio_indexes: list[int],
     output_path: Path,
 ) -> Iterable[Union[FfmpegSelectAudioResult, FfmpegProgressLine]]:
     audio_map_options = []

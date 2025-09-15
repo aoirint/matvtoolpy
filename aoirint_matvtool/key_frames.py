@@ -1,6 +1,6 @@
 import subprocess
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 from pydantic import BaseModel
 
@@ -55,8 +55,8 @@ def ffmpeg_key_frames(
 
             # Workaround for FFprobe issue: (side_data.+)?
             # https://trac.ffmpeg.org/ticket/7153
-            # Correct: frame,0.007000,side_data,H.26[45] User Data Unregistered SEI message
-            # Broken: frame,0.007000side_data,H.26[45] User Data Unregistered SEI message
+            # Correct: frame,0.007000,side_data,H.26[45] User Data Unregistered SEI message  # noqa: E501
+            # Broken: frame,0.007000side_data,H.26[45] User Data Unregistered SEI message  # noqa: E501
             if seconds_string.endswith("side_data"):
                 seconds_string = seconds_string[:-9]  # 0.007000side_data -> 0.007000
 

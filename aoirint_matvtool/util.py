@@ -1,8 +1,9 @@
 import re
+from collections.abc import Iterable
 from datetime import timedelta
 from math import log10
 from pathlib import Path
-from typing import Iterable, Optional, TypeVar
+from typing import Optional, TypeVar
 
 from pydantic import BaseModel
 
