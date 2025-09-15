@@ -79,7 +79,7 @@ jobs:
             asset_name: matvtool-windows-amd64.exe
             sed: 'sed'
           -
-            os: 'macos-12'
+            os: 'macos-14'
             artifact_name: matvtool
             asset_name: matvtool-macos-amd64
             sed: 'gsed'
