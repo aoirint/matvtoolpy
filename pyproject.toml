@@ -1,18 +1,19 @@
-[tool.pysen]
-version = "0.11"
+[tool.ruff]
+line-length = 88
 
-[tool.pysen.lint]
-enable_black = true
-enable_flake8 = true
-enable_isort = true
-enable_mypy = true
-mypy_preset = "strict"
-line_length = 88
-py_version = "py311"
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "B",  # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "UP",  # pyupgrade
+]
 
-  [[tool.pysen.lint.mypy_targets]]
-    paths = ["."]
-
+[tool.mypy]
+strict = true
 
 [tool.poetry]
 name = "aoirint-matvtool"
@@ -37,14 +38,10 @@ tqdm = "^4.66.4"
 types-tqdm = "^4.66.0.20240417"
 numpy = "^1.26.4"
 opencv-python = "^4.9.0.80"
-pysen = "^0.11.0"
-black = "^24.4.2"
-isort = "^5.13.2"
-flake8 = "^7.0.0"
-flake8-bugbear = "^24.4.26"
-mypy = "^1.10.0"
-pytest = "^8.2.1"
 pyinstaller = "^6.7.0"
+ruff = "^0.13.0"
+mypy = "^1.18.1"
+pytest = "^8.4.2"
 
 [build-system]
 requires = ["poetry-core"]
