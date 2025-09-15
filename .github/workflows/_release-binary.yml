@@ -77,8 +77,6 @@ jobs:
         with:
           tag: ${{ inputs.git_version }}
           commit: ${{ github.sha }}
-          prerelease: true
-          generateReleaseNotes: true
           allowUpdates: true
           omitNameDuringUpdate: true
           omitDraftDuringUpdate: true
