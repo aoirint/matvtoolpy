@@ -1,12 +1,14 @@
-import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Literal, TypeGuard
 
-from tqdm import tqdm
-
-from ..crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
-from ..find_image import FfmpegProgressLine
+from ..progress_handler.base import ProgressHandler
+from ..progress_handler.plain import ProgressHandlerPlain
+from ..progress_handler.tqdm import ProgressHandlerTqdm
+from ..video_utility.crop_scaler import (
+    CropScaler,
+    CropScalerProgress,
+)
 
 
 def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "none"]]:
@@ -20,44 +22,35 @@ def execute_crop_scale_cli(
     scale: str | None,
     video_codec: str | None,
     progress_type: Literal["tqdm", "plain", "none"],
+    ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> None:
-    # tqdm
-    tqdm_pbar = None
+    crop_scaler = CropScaler(
+        ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
+    )
+
+    progress_handler: ProgressHandler | None = None
     if progress_type == "tqdm":
-        tqdm_pbar = tqdm()
+        progress_handler = ProgressHandlerTqdm()
+    elif progress_type == "plain":
+        progress_handler = ProgressHandlerPlain()
 
-    try:
-        for output in ffmpeg_crop_scale(
-            input_path=input_path,
-            crop=crop,
-            scale=scale,
-            video_codec=video_codec,
-            output_path=output_path,
-        ):
-            if isinstance(output, FfmpegProgressLine):
-                if tqdm_pbar is not None:
-                    tqdm_pbar.set_postfix(
-                        {
-                            "time": output.time,
-                            "frame": f"{output.frame}",
-                        }
-                    )
-                    tqdm_pbar.refresh()
+    def _handle_progress(progress: CropScalerProgress) -> None:
+        if progress_handler is not None:
+            progress_handler.handle_progress(
+                frame=progress.frame,
+                time=progress.time,
+            )
 
-                if progress_type == "plain":
-                    print(
-                        f"Progress | Time {output.time}, frame {output.frame}",
-                        file=sys.stderr,
-                    )
-
-            if isinstance(output, FfmpegCropScaleResult):
-                if tqdm_pbar is not None:
-                    tqdm_pbar.clear()
-
-                print(f"Output | {output}")
-    finally:
-        if tqdm_pbar is not None:
-            tqdm_pbar.close()
+    crop_scaler.crop_scale(
+        input_path=input_path,
+        crop=crop,
+        scale=scale,
+        video_codec=video_codec,
+        output_path=output_path,
+        progress_handler=_handle_progress,
+    )
 
 
 def handle_crop_scale_cli(args: Namespace) -> None:
@@ -67,6 +60,8 @@ def handle_crop_scale_cli(args: Namespace) -> None:
     scale: str | None = args.scale
     video_codec: str | None = args.video_codec
     progress_type: str = args.progress_type
+    ffmpeg_path: str = args.ffmpeg_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
     output_path = Path(output_path_string)
@@ -81,6 +76,8 @@ def handle_crop_scale_cli(args: Namespace) -> None:
         scale=scale,
         video_codec=video_codec,
         progress_type=progress_type,
+        ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
