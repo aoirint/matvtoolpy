@@ -7,13 +7,13 @@ from .base import ProgressHandler
 
 
 class ProgressHandlerTqdm(ProgressHandler):
-    tqdm_pbar: tqdm[NoReturn] | None
+    _tqdm_pbar: tqdm[NoReturn] | None
 
     def __init__(self) -> None:
-        self.tqdm_pbar = None
+        self._tqdm_pbar = None
 
     def __enter__(self) -> Self:
-        self.tqdm_pbar = tqdm()
+        self._tqdm_pbar = tqdm()
         return self
 
     def __exit__(
@@ -22,20 +22,20 @@ class ProgressHandlerTqdm(ProgressHandler):
         exc: BaseException | None,
         tb: TracebackType | None,
     ) -> bool | None:
-        if self.tqdm_pbar is not None:
-            self.tqdm_pbar.close()
+        if self._tqdm_pbar is not None:
+            self._tqdm_pbar.close()
         return None
 
     def handle_progress(self, frame: int, time: str) -> None:
-        if self.tqdm_pbar is None:
+        if self._tqdm_pbar is None:
             raise RuntimeError(
                 "tqdm_pbar is not initialized. Did you forget to use 'with' statement?"
             )
 
-        self.tqdm_pbar.set_postfix(
+        self._tqdm_pbar.set_postfix(
             {
                 "time": time,
                 "frame": f"{frame}",
             },
         )
-        self.tqdm_pbar.refresh()
+        self._tqdm_pbar.refresh()

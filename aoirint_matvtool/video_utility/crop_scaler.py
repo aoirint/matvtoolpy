@@ -23,8 +23,8 @@ class CropScaler:
         ffmpeg_path: str,
         ffprobe_path: str,
     ) -> None:
-        self.ffmpeg_path = ffmpeg_path
-        self.ffprobe_path = ffprobe_path
+        self._ffmpeg_path = ffmpeg_path
+        self._ffprobe_path = ffprobe_path
 
     def crop_scale(
         self,
