@@ -5,8 +5,11 @@ from typing import Any, Literal, TypeGuard
 
 from tqdm import tqdm
 
-from ..crop_scale import FfmpegCropScaleResult, ffmpeg_crop_scale
 from ..find_image import FfmpegProgressLine
+from ..video_utility.crop_scaler import (
+    CropScaler,
+    FfmpegCropScaleResult,
+)
 
 
 def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "none"]]:
@@ -20,14 +23,21 @@ def execute_crop_scale_cli(
     scale: str | None,
     video_codec: str | None,
     progress_type: Literal["tqdm", "plain", "none"],
+    ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> None:
     # tqdm
     tqdm_pbar = None
     if progress_type == "tqdm":
         tqdm_pbar = tqdm()
 
+    crop_scaler = CropScaler(
+        ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
+    )
+
     try:
-        for output in ffmpeg_crop_scale(
+        for output in crop_scaler.crop_scale(
             input_path=input_path,
             crop=crop,
             scale=scale,
@@ -67,6 +77,8 @@ def handle_crop_scale_cli(args: Namespace) -> None:
     scale: str | None = args.scale
     video_codec: str | None = args.video_codec
     progress_type: str = args.progress_type
+    ffmpeg_path: str = args.ffmpeg_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
     output_path = Path(output_path_string)
@@ -81,6 +93,8 @@ def handle_crop_scale_cli(args: Namespace) -> None:
         scale=scale,
         video_codec=video_codec,
         progress_type=progress_type,
+        ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
