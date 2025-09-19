@@ -30,7 +30,7 @@ authors = [
   {name = "aoirint", email = "aoirint@gmail.com"},
 ]
 license = "MIT"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "pydantic>=2.11.9",
     "tqdm>=4.67.1",
