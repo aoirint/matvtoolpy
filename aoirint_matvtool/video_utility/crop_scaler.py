@@ -6,7 +6,6 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .. import config
 from ..util import exclude_none
 from ..utility.async_subprocess_helper import wait_process
 
@@ -59,7 +58,7 @@ class CropScaler:
         video_codec_opts = ["-c:v", video_codec] if video_codec is not None else []
 
         command = [
-            config.FFMPEG_PATH,
+            self._ffmpeg_path,
             "-hide_banner",
             "-n",  # fail if already exists
             "-i",
@@ -87,7 +86,7 @@ class CropScaler:
                 _time = match.group(2).strip()
 
                 if progress_handler:
-                    progress_handler(
+                    await progress_handler(
                         CropScalerProgress(
                             frame=frame,
                             time=_time,
