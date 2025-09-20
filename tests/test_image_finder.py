@@ -40,7 +40,7 @@ async def test_image_finder(
         fps=None,
         blackframe_amount=95,
         blackframe_threshold=32,
-        output_interval=1.0,
+        output_interval=0.0,
         progress_handler=None,
         result_handler=result_handler,
     )
