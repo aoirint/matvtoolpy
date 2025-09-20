@@ -1,13 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from datetime import timedelta
 from types import TracebackType
 from typing import Self
-
-
-@dataclass
-class Progress:
-    frame: int
-    time: str
 
 
 class ProgressHandler(ABC):
@@ -23,4 +17,10 @@ class ProgressHandler(ABC):
         return None
 
     @abstractmethod
-    async def handle_progress(self, frame: int, time: str) -> None: ...
+    async def handle_progress(
+        self,
+        frame: int,
+        time: timedelta,
+        internal_frame: int,
+        internal_time: timedelta,
+    ) -> None: ...
