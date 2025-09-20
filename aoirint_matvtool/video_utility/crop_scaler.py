@@ -1,10 +1,12 @@
+import asyncio
 import re
-import subprocess
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from logging import getLogger
 from pathlib import Path
 
 from pydantic import BaseModel
+
+from aoirint_matvtool.utility.async_subprocess_helper import wait_process
 
 from .. import config
 from ..util import exclude_none
@@ -21,19 +23,17 @@ class CropScaler:
     def __init__(
         self,
         ffmpeg_path: str,
-        ffprobe_path: str,
     ) -> None:
         self._ffmpeg_path = ffmpeg_path
-        self._ffprobe_path = ffprobe_path
 
-    def crop_scale(
+    async def crop_scale(
         self,
         input_path: Path,
         crop: str | None,
         scale: str | None,
         video_codec: str | None,
         output_path: Path,
-        progress_handler: Callable[[CropScalerProgress], None] | None = None,
+        progress_handler: Callable[[CropScalerProgress], Awaitable[None]] | None = None,
     ) -> None:
         # TODO: quality control
         if crop is not None and "," in crop:
@@ -75,34 +75,29 @@ class CropScaler:
             "0",
             str(output_path),
         ]
-        proc = subprocess.Popen(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            encoding="utf-8",
+        proc = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
 
-        try:
-            while proc.poll() is None:
-                assert proc.stderr is not None
-                line = proc.stderr.readline().strip()
+        async def _handle_stderr(line: str) -> None:
+            match = re.match(r"^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$", line)
+            if match:
+                frame = int(match.group(1))
+                _time = match.group(2).strip()
 
-                match = re.match(r"^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$", line)
-                if match:
-                    frame = int(match.group(1))
-                    _time = match.group(2).strip()
+                if progress_handler:
+                    progress_handler(
+                        CropScalerProgress(
+                            frame=frame,
+                            time=_time,
+                        ),
+                    )
 
-                    if progress_handler:
-                        progress_handler(
-                            CropScalerProgress(
-                                frame=frame,
-                                time=_time,
-                            ),
-                        )
-
-            returncode = proc.wait()
-        finally:
-            proc.kill()
-
-        if returncode != 0:
-            raise Exception(f"FFmpeg errored. code: {returncode}")
+        return_code = await wait_process(
+            process=proc,
+            stderr_callback=_handle_stderr,
+        )
+        if return_code != 0:
+            raise Exception(f"FFmpeg errored. code: {return_code}")

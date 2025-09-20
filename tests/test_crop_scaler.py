@@ -12,11 +12,11 @@ def crop_scaler(
 ) -> CropScaler:
     return CropScaler(
         ffmpeg_path=ffmpeg_path,
-        ffprobe_path=ffprobe_path,
     )
 
 
-def test_crop_scaler(
+@pytest.mark.asyncio
+async def test_crop_scaler(
     crop_scaler: CropScaler,
     fixture_dir: Path,
     tmp_path: Path,
@@ -24,7 +24,7 @@ def test_crop_scaler(
     input_file = fixture_dir / "sample1.mkv"
     output_file = tmp_path / "output.mkv"
 
-    crop_scaler.crop_scale(
+    await crop_scaler.crop_scale(
         input_path=input_file,
         crop="w=106:h=60:x=106:y=60",  # 320x180 の中央部分をクロップ
         scale="160:90",  # 160x90 にリサイズ

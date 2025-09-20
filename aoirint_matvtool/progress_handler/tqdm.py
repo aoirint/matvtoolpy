@@ -12,11 +12,11 @@ class ProgressHandlerTqdm(ProgressHandler):
     def __init__(self) -> None:
         self._tqdm_pbar = None
 
-    def __enter__(self) -> Self:
+    async def __aenter__(self) -> Self:
         self._tqdm_pbar = tqdm()
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
         exc: BaseException | None,
@@ -26,7 +26,7 @@ class ProgressHandlerTqdm(ProgressHandler):
             self._tqdm_pbar.close()
         return None
 
-    def handle_progress(self, frame: int, time: str) -> None:
+    async def handle_progress(self, frame: int, time: str) -> None:
         if self._tqdm_pbar is None:
             raise RuntimeError(
                 "tqdm_pbar is not initialized. Did you forget to use 'with' statement?"
