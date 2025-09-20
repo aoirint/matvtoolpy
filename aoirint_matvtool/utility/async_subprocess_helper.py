@@ -5,7 +5,7 @@ from typing import Any
 
 async def _consume_stream(
     stream: asyncio.StreamReader | None,
-    log_callback: Callable[[str], None | Awaitable[None]] | None,
+    handler: Callable[[str], None | Awaitable[None]] | None,
 ) -> None:
     if stream is None:
         return
@@ -19,22 +19,22 @@ async def _consume_stream(
         if not line:
             break
 
-        if asyncio.iscoroutinefunction(log_callback):
-            await log_callback(line)
-        elif callable(log_callback):
-            log_callback(line)
+        if asyncio.iscoroutinefunction(handler):
+            await handler(line)
+        elif callable(handler):
+            handler(line)
 
 
 async def wait_process(
     process: asyncio.subprocess.Process,
-    stdout_callback: Callable[[str], None | Awaitable[None]] | None = None,
-    stderr_callback: Callable[[str], None | Awaitable[None]] | None = None,
+    stdout_handler: Callable[[str], None | Awaitable[None]] | None = None,
+    stderr_handler: Callable[[str], None | Awaitable[None]] | None = None,
 ) -> int:
     coros: list[Awaitable[Any]] = []
     if process.stdout:
-        coros.append(_consume_stream(process.stdout, stdout_callback))
+        coros.append(_consume_stream(process.stdout, stdout_handler))
     if process.stderr:
-        coros.append(_consume_stream(process.stderr, stderr_callback))
+        coros.append(_consume_stream(process.stderr, stderr_handler))
 
     await asyncio.gather(*coros)
 
