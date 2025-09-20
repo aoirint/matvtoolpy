@@ -5,8 +5,7 @@ from typing import Any, Literal, TypeGuard
 
 from tqdm import tqdm
 
-from ..find_image import FfmpegProgressLine
-from ..slice import FfmpegSliceResult, ffmpeg_slice
+from ..slice import FfmpegProgressLine, FfmpegSliceResult, ffmpeg_slice
 
 
 def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "none"]]:
