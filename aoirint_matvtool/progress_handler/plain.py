@@ -23,7 +23,8 @@ class ProgressHandlerPlain(ProgressHandler):
 
         print(
             (
-                f"Progress | Time {time_string}, "
+                f"Progress | "
+                f"Time {time_string}, "
                 f"frame {frame} "
                 f"(Internal time {internal_time_string}, "
                 f"frame {internal_frame})"
@@ -31,3 +32,6 @@ class ProgressHandlerPlain(ProgressHandler):
             file=sys.stderr,
             flush=True,
         )
+
+    async def clear(self) -> None:
+        print("", flush=True)

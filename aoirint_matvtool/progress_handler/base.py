@@ -24,3 +24,6 @@ class ProgressHandler(ABC):
         internal_frame: int,
         internal_time: timedelta,
     ) -> None: ...
+
+    @abstractmethod
+    async def clear(self) -> None: ...

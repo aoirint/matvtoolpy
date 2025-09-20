@@ -57,3 +57,7 @@ class ProgressHandlerTqdm(ProgressHandler):
             },
         )
         self._tqdm_pbar.refresh()
+
+    async def clear(self) -> None:
+        if self._tqdm_pbar is not None:
+            self._tqdm_pbar.clear()
