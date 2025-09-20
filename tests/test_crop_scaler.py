@@ -8,7 +8,6 @@ from aoirint_matvtool.video_utility.crop_scaler import CropScaler
 @pytest.fixture
 def crop_scaler(
     ffmpeg_path: str,
-    ffprobe_path: str,
 ) -> CropScaler:
     return CropScaler(
         ffmpeg_path=ffmpeg_path,
