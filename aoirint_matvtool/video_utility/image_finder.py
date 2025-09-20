@@ -7,12 +7,15 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from aoirint_matvtool.fps import ffmpeg_fps
-from aoirint_matvtool.progress_handler.utility.progress_calculator import (
+from ..fps import ffmpeg_fps
+from ..progress_handler.utility.progress_calculator import (
     ProgressCalculator,
 )
-
-from ..util import exclude_none, parse_ffmpeg_time_unit_syntax
+from ..util import (
+    exclude_none,
+    get_real_start_timedelta_by_ss,
+    parse_ffmpeg_time_unit_syntax,
+)
 from ..utility.async_subprocess_helper import wait_process
 
 logger = getLogger(__name__)
@@ -25,13 +28,20 @@ class ImageFinderProgress(BaseModel):
     internal_frame: int
 
 
-class ImageFinderResult(BaseModel):
+class _FfmpegBlackframeResult(BaseModel):
     frame: int
     pblack: int
     pts: int
     t: float
     type: str
     last_keyframe: int
+
+
+class ImageFinderResult(BaseModel):
+    time: timedelta
+    frame: int
+    internal_time: timedelta
+    internal_frame: int
 
 
 class ImageFinder:
@@ -52,6 +62,7 @@ class ImageFinder:
         fps: int | None,
         blackframe_amount: int = 98,
         blackframe_threshold: int = 32,
+        output_interval: float = 0.0,
         progress_handler: Callable[[ImageFinderProgress], Awaitable[None]]
         | None = None,
         result_handler: Callable[[ImageFinderResult], Awaitable[None]] | None = None,
@@ -62,8 +73,15 @@ class ImageFinder:
         if not input_video_fps:
             raise Exception("Failed to get FPS info from the input video.")
 
+        start_timedelta = timedelta()
+        if input_video_ss is not None:
+            start_timedelta = get_real_start_timedelta_by_ss(
+                video_path=input_video_path,
+                ss=input_video_ss,
+            )
+
         progress_calculator = ProgressCalculator(
-            start_timedelta=timedelta(),
+            start_timedelta=start_timedelta,
             input_fps=input_video_fps,
             internal_fps=input_video_fps,
         )
@@ -166,22 +184,46 @@ class ImageFinder:
             stderr=asyncio.subprocess.PIPE,
         )
 
+        prev_result_timedelta = timedelta(seconds=-output_interval)
+
         async def _handle_stderr(line: str) -> None:
+            nonlocal prev_result_timedelta
+
             match = re.match(r"^\[Parsed_blackframe.+?\]\ (frame:.+)$", line)
             if (
                 match
             ):  # "frame:810 pblack:99 pts:13516 t:13.516000 type:P last_keyframe:720"
-                result = match.group(1).strip()
+                _result_string = match.group(1).strip()
 
-                result_dict: dict[str, str] = {}
-                for key_value in result.split(" "):
+                _result_dict: dict[str, str] = {}
+                for key_value in _result_string.split(" "):
                     key, value = key_value.split(":", maxsplit=2)
-                    result_dict[key] = value
+                    _result_dict[key] = value
 
-                if result_handler:
-                    await result_handler(
-                        ImageFinderResult.model_validate(result_dict),
-                    )
+                _result = _FfmpegBlackframeResult.model_validate(_result_dict)
+
+                internal_timedelta = timedelta(seconds=_result.t)
+
+                # 開始時間(ss)分、検出時刻を補正
+                input_timedelta = start_timedelta + internal_timedelta
+
+                if (
+                    timedelta(seconds=output_interval)
+                    <= input_timedelta - prev_result_timedelta
+                ):
+                    if result_handler:
+                        await result_handler(
+                            ImageFinderResult(
+                                time=input_timedelta,
+                                frame=int(
+                                    input_timedelta.total_seconds() * input_video_fps
+                                ),
+                                internal_time=internal_timedelta,
+                                internal_frame=_result.frame,
+                            ),
+                        )
+
+                    prev_result_timedelta = input_timedelta
 
             match = re.match(r"^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$", line)
             if match:

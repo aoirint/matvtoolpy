@@ -1,21 +1,16 @@
-import sys
 from argparse import ArgumentParser, Namespace
-from datetime import timedelta
+from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import Any, Literal, TypeGuard
-
-from tqdm import tqdm
 
 from ..progress_handler.base import ProgressHandler
 from ..progress_handler.plain import ProgressHandlerPlain
 from ..progress_handler.tqdm import ProgressHandlerTqdm
-from ..video_utility.image_finder import ImageFinder, ImageFinderProgress, ImageFinderResult
-
-from ..fps import ffmpeg_fps
-from ..util import (
-    format_timedelta_as_time_unit_syntax_string,
-    get_real_start_timedelta_by_ss,
-    parse_ffmpeg_time_unit_syntax,
+from ..util import format_timedelta_as_time_unit_syntax_string
+from ..video_utility.image_finder import (
+    ImageFinder,
+    ImageFinderProgress,
+    ImageFinderResult,
 )
 
 
@@ -41,33 +36,12 @@ async def execute_find_image_cli(
         ffmpeg_path=ffmpeg_path,
     )
 
-    # FPS
-    input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
-    assert input_video_fps is not None, "FPS info not found in the input video"
-
-    internal_fps = fps if fps is not None else input_video_fps
-
-    # Time
-    start_timedelta = get_real_start_timedelta_by_ss(video_path=input_video_path, ss=ss)
-
-    progress_handler: ProgressHandler | None = None
-    if progress_type == "tqdm":
-        progress_handler = ProgressHandlerTqdm()
-    elif progress_type == "plain":
-        progress_handler = ProgressHandlerPlain(
-            start_timedelta=start_timedelta,
-            input_fps=input_video_fps,
-            internal_fps=internal_fps,
-        ) 
-
-
-    # tqdm
-    tqdm_pbar = None
-    if progress_type == "tqdm":
-        tqdm_pbar = tqdm()
-
-    prev_input_timedelta = timedelta(seconds=-output_interval)
-
+    async with AsyncExitStack() as stack:
+        progress_handler: ProgressHandler | None = None
+        if progress_type == "tqdm":
+            progress_handler = await stack.enter_async_context(ProgressHandlerTqdm())
+        elif progress_type == "plain":
+            progress_handler = await stack.enter_async_context(ProgressHandlerPlain())
 
     async def _handle_progress(progress: ImageFinderProgress) -> None:
         if progress_handler is not None:
@@ -77,71 +51,42 @@ async def execute_find_image_cli(
                 internal_frame=progress.internal_frame,
                 internal_time=progress.internal_time,
             )
-        
+
     async def _handle_result(result: ImageFinderResult) -> None:
-        pass
+        internal_time_string = format_timedelta_as_time_unit_syntax_string(
+            td=result.internal_time,
+        )
+        input_time_string = format_timedelta_as_time_unit_syntax_string(
+            td=result.time,
+        )
 
-    # TODO:
-    # await image_finder.find_image(
-    #     input_video_ss=ss,
-    #     input_video_to=to,
-    #     input_video_path=input_video_path,
-    #     input_video_crop=input_video_crop,
-    #     reference_image_path=reference_image_path,
-    #     reference_image_crop=reference_image_crop,
-    #     fps=fps,
-    #     blackframe_amount=blackframe_amount,
-    #     blackframe_threshold=blackframe_threshold,
-    #     progress_handler=_handle_progress,
-    #     result_handler=_handle_result,
-    # )
+        if progress_handler is not None:
+            await progress_handler.clear()
 
-    # Execute
-    # for output in ffmpeg_find_image_generator(
-    #     input_video_ss=ss,
-    #     input_video_to=to,
-    #     input_video_path=input_video_path,
-    #     input_video_crop=input_video_crop,
-    #     reference_image_path=reference_image_path,
-    #     reference_image_crop=reference_image_crop,
-    #     fps=fps,
-    #     blackframe_amount=blackframe_amount,
-    #     blackframe_threshold=blackframe_threshold,
-    # ):
-    #     if isinstance(output, FfmpegProgressLine):
+        print(
+            (
+                "Output | "
+                f"Time {input_time_string}, "
+                f"frame {result.frame} "
+                f"(Internal time {internal_time_string}, "
+                f"frame {result.internal_frame})"
+            ),
+        )
 
-    #     if isinstance(output, FfmpegBlackframeOutputLine):
-    #         internal_timedelta = timedelta(seconds=output.t)
-    #         internal_time_string = format_timedelta_as_time_unit_syntax_string(
-    #             internal_timedelta
-    #         )
-
-    #         # 開始時間(ss)分、検出時刻を補正
-    #         input_timedelta = start_timedelta + internal_timedelta
-    #         input_time_string = format_timedelta_as_time_unit_syntax_string(
-    #             input_timedelta
-    #         )
-
-    #         if (
-    #             timedelta(seconds=output_interval)
-    #             <= input_timedelta - prev_input_timedelta
-    #         ):
-    #             # 開始時間(ss)・フレームレート(fps)分、フレームを補正
-    #             internal_frame = output.frame
-    #             rescaled_output_frame = (
-    #                 internal_frame / internal_fps * input_video_fps
-    #             )
-    #             input_frame = int(start_frame + rescaled_output_frame)
-
-    #             if tqdm_pbar is not None:
-    #                 tqdm_pbar.clear()
-
-    #             print(
-    #                 f"Output | Time {input_time_string}, frame {input_frame} (Internal time {internal_time_string}, frame {internal_frame})"  # noqa: E501
-    #             )
-
-    #             prev_input_timedelta = input_timedelta
-
+    await image_finder.find_image(
+        input_video_ss=ss,
+        input_video_to=to,
+        input_video_path=input_video_path,
+        input_video_crop=input_video_crop,
+        reference_image_path=reference_image_path,
+        reference_image_crop=reference_image_crop,
+        fps=fps,
+        blackframe_amount=blackframe_amount,
+        blackframe_threshold=blackframe_threshold,
+        output_interval=output_interval,
+        progress_handler=_handle_progress,
+        result_handler=_handle_result,
+    )
 
 
 async def handle_find_image_cli(args: Namespace) -> None:
