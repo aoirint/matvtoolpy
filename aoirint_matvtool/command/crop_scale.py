@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, Namespace
+from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import Any, Literal, TypeGuard
 
@@ -28,27 +29,32 @@ async def execute_crop_scale_cli(
         ffmpeg_path=ffmpeg_path,
     )
 
-    progress_handler: ProgressHandler | None = None
-    if progress_type == "tqdm":
-        progress_handler = ProgressHandlerTqdm()
-    elif progress_type == "plain":
-        progress_handler = ProgressHandlerPlain()
-
-    async def _handle_progress(progress: CropScalerProgress) -> None:
-        if progress_handler is not None:
-            await progress_handler.handle_progress(
-                frame=progress.frame,
-                time=progress.time,
+    async with AsyncExitStack() as stack:
+        progress_handler: ProgressHandler | None = None
+        if progress_type == "tqdm":
+            progress_handler = await stack.enter_async_context(
+                ProgressHandlerTqdm(),
+            )
+        elif progress_type == "plain":
+            progress_handler = await stack.enter_async_context(
+                ProgressHandlerPlain(),
             )
 
-    await crop_scaler.crop_scale(
-        input_path=input_path,
-        crop=crop,
-        scale=scale,
-        video_codec=video_codec,
-        output_path=output_path,
-        progress_handler=_handle_progress,
-    )
+        async def _handle_progress(progress: CropScalerProgress) -> None:
+            if progress_handler is not None:
+                await progress_handler.handle_progress(
+                    frame=progress.frame,
+                    time=progress.time,
+                )
+
+        await crop_scaler.crop_scale(
+            input_path=input_path,
+            crop=crop,
+            scale=scale,
+            video_codec=video_codec,
+            output_path=output_path,
+            progress_handler=_handle_progress,
+        )
 
 
 async def handle_crop_scale_cli(args: Namespace) -> None:
