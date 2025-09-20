@@ -1,13 +1,19 @@
 from types import TracebackType
-from typing import NoReturn, Self
+from typing import TYPE_CHECKING, NoReturn, Self
 
 from tqdm import tqdm
 
 from .base import ProgressHandler
 
+if TYPE_CHECKING:
+    # NOTE: https://github.com/tqdm/tqdm/issues/1601
+    TqdmNoReturn = tqdm[NoReturn]
+else:
+    TqdmNoReturn = tqdm
+
 
 class ProgressHandlerTqdm(ProgressHandler):
-    _tqdm_pbar: tqdm[NoReturn] | None
+    _tqdm_pbar: TqdmNoReturn | None
 
     def __init__(self) -> None:
         self._tqdm_pbar = None
