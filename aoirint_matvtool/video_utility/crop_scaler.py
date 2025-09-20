@@ -6,10 +6,9 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from aoirint_matvtool.utility.async_subprocess_helper import wait_process
-
 from .. import config
 from ..util import exclude_none
+from ..utility.async_subprocess_helper import wait_process
 
 logger = getLogger(__name__)
 
