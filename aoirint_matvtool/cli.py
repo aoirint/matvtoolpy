@@ -1,5 +1,6 @@
 import logging
 from argparse import ArgumentParser, Namespace
+from asyncio import iscoroutinefunction
 
 from . import __version__ as APP_VERSION
 from . import config
@@ -13,7 +14,7 @@ from .command.select_audio import add_arguments_select_audio_cli
 from .command.slice import add_arguments_slice_cli
 
 
-def execute_main_cli(
+async def execute_main_cli(
     parser: ArgumentParser,
     args: Namespace,
     log_level: int,
@@ -29,12 +30,17 @@ def execute_main_cli(
     config.FFPROBE_PATH = ffprobe_path
 
     if hasattr(args, "handler"):
-        args.handler(args)
+        if iscoroutinefunction(args.handler):
+            await args.handler(args)
+        elif callable(args.handler):
+            args.handler(args)
+        else:
+            parser.print_help()
     else:
         parser.print_help()
 
 
-def handle_main_cli(
+async def handle_main_cli(
     parser: ArgumentParser,
     args: Namespace,
 ) -> None:
@@ -42,7 +48,7 @@ def handle_main_cli(
     ffmpeg_path: str = args.ffmpeg_path
     ffprobe_path: str = args.ffprobe_path
 
-    execute_main_cli(
+    await execute_main_cli(
         parser=parser,
         args=args,
         log_level=log_level,
@@ -51,7 +57,7 @@ def handle_main_cli(
     )
 
 
-def add_arguments_main_cli(parser: ArgumentParser) -> None:
+async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     parser.add_argument("-l", "--log_level", type=int, default=logging.INFO)
     parser.add_argument("-v", "--version", action="version", version=APP_VERSION)
     parser.add_argument("--ffmpeg_path", type=str, default=config.FFMPEG_PATH)
@@ -72,7 +78,7 @@ def add_arguments_main_cli(parser: ArgumentParser) -> None:
     add_arguments_slice_cli(parser=parser_slice)
 
     parser_crop_scale = subparsers.add_parser("crop_scale")
-    add_arguments_crop_scale_cli(parser=parser_crop_scale)
+    await add_arguments_crop_scale_cli(parser=parser_crop_scale)
 
     parser_find_image = subparsers.add_parser("find_image")
     add_arguments_find_image_cli(parser=parser_find_image)
@@ -84,12 +90,12 @@ def add_arguments_main_cli(parser: ArgumentParser) -> None:
     add_arguments_select_audio_cli(parser=parser_select_audio)
 
 
-def main() -> None:
+async def main() -> None:
     parser = ArgumentParser()
-    add_arguments_main_cli(parser=parser)
+    await add_arguments_main_cli(parser=parser)
 
     args = parser.parse_args()
-    handle_main_cli(
+    await handle_main_cli(
         parser=parser,
         args=args,
     )

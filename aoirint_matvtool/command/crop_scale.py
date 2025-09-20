@@ -15,7 +15,7 @@ def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "no
     return value in ("tqdm", "plain", "none")
 
 
-def execute_crop_scale_cli(
+async def execute_crop_scale_cli(
     input_path: Path,
     output_path: Path,
     crop: str | None,
@@ -23,11 +23,9 @@ def execute_crop_scale_cli(
     video_codec: str | None,
     progress_type: Literal["tqdm", "plain", "none"],
     ffmpeg_path: str,
-    ffprobe_path: str,
 ) -> None:
     crop_scaler = CropScaler(
         ffmpeg_path=ffmpeg_path,
-        ffprobe_path=ffprobe_path,
     )
 
     progress_handler: ProgressHandler | None = None
@@ -36,14 +34,14 @@ def execute_crop_scale_cli(
     elif progress_type == "plain":
         progress_handler = ProgressHandlerPlain()
 
-    def _handle_progress(progress: CropScalerProgress) -> None:
+    async def _handle_progress(progress: CropScalerProgress) -> None:
         if progress_handler is not None:
-            progress_handler.handle_progress(
+            await progress_handler.handle_progress(
                 frame=progress.frame,
                 time=progress.time,
             )
 
-    crop_scaler.crop_scale(
+    await crop_scaler.crop_scale(
         input_path=input_path,
         crop=crop,
         scale=scale,
@@ -53,7 +51,7 @@ def execute_crop_scale_cli(
     )
 
 
-def handle_crop_scale_cli(args: Namespace) -> None:
+async def handle_crop_scale_cli(args: Namespace) -> None:
     input_path_string: str = args.input_path
     output_path_string: str = args.output_path
     crop: str | None = args.crop
@@ -61,7 +59,6 @@ def handle_crop_scale_cli(args: Namespace) -> None:
     video_codec: str | None = args.video_codec
     progress_type: str = args.progress_type
     ffmpeg_path: str = args.ffmpeg_path
-    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
     output_path = Path(output_path_string)
@@ -69,7 +66,7 @@ def handle_crop_scale_cli(args: Namespace) -> None:
     if not validate_progress_type(progress_type):
         raise ValueError(f"Invalid progress type: {progress_type}")
 
-    execute_crop_scale_cli(
+    await execute_crop_scale_cli(
         input_path=input_path,
         output_path=output_path,
         crop=crop,
@@ -77,11 +74,10 @@ def handle_crop_scale_cli(args: Namespace) -> None:
         video_codec=video_codec,
         progress_type=progress_type,
         ffmpeg_path=ffmpeg_path,
-        ffprobe_path=ffprobe_path,
     )
 
 
-def add_arguments_crop_scale_cli(parser: ArgumentParser) -> None:
+async def add_arguments_crop_scale_cli(parser: ArgumentParser) -> None:
     parser.add_argument(
         "-i",
         "--input_path",

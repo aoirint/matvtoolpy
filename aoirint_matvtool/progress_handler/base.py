@@ -11,10 +11,10 @@ class Progress:
 
 
 class ProgressHandler(ABC):
-    def __enter__(self) -> Self:
+    async def __aenter__(self) -> Self:
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
         exc: BaseException | None,
@@ -23,4 +23,4 @@ class ProgressHandler(ABC):
         return None
 
     @abstractmethod
-    def handle_progress(self, frame: int, time: str) -> None: ...
+    async def handle_progress(self, frame: int, time: str) -> None: ...
