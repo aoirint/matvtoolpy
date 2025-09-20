@@ -45,6 +45,8 @@ async def execute_crop_scale_cli(
                 await progress_handler.handle_progress(
                     frame=progress.frame,
                     time=progress.time,
+                    internal_frame=progress.internal_frame,
+                    internal_time=progress.internal_time,
                 )
 
         await crop_scaler.crop_scale(

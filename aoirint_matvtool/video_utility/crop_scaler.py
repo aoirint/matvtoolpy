@@ -1,20 +1,25 @@
 import asyncio
 import re
 from collections.abc import Awaitable, Callable
+from datetime import timedelta
 from logging import getLogger
 from pathlib import Path
 
 from pydantic import BaseModel
 
-from ..util import exclude_none
+from ..fps import ffmpeg_fps
+from ..progress_handler.utility.progress_calculator import ProgressCalculator
+from ..util import exclude_none, parse_ffmpeg_time_unit_syntax
 from ..utility.async_subprocess_helper import wait_process
 
 logger = getLogger(__name__)
 
 
 class CropScalerProgress(BaseModel):
+    time: timedelta
     frame: int
-    time: str
+    internal_time: timedelta
+    internal_frame: int
 
 
 class CropScaler:
@@ -33,6 +38,18 @@ class CropScaler:
         output_path: Path,
         progress_handler: Callable[[CropScalerProgress], Awaitable[None]] | None = None,
     ) -> None:
+        # FPS
+        # TODO: モジュール化
+        input_video_fps = ffmpeg_fps(input_path=input_path).fps
+        if not input_video_fps:
+            raise Exception("Failed to get FPS info from the input video.")
+
+        progress_calculator = ProgressCalculator(
+            start_timedelta=timedelta(),
+            input_fps=input_video_fps,
+            internal_fps=input_video_fps,
+        )
+
         # TODO: quality control
         if crop is not None and "," in crop:
             raise ValueError("Invalid crop argument. Remove ',' from crop.")
@@ -82,14 +99,24 @@ class CropScaler:
         async def _handle_stderr(line: str) -> None:
             match = re.match(r"^frame=\ *(\d+?)\ .+time=(.+?)\ bitrate.+$", line)
             if match:
-                frame = int(match.group(1))
-                _time = match.group(2).strip()
+                _frame = int(match.group(1))
+                _time_string = match.group(2).strip()
+
+                _time_struct = parse_ffmpeg_time_unit_syntax(_time_string)
+                _time = _time_struct.to_timedelta()
+
+                progress = progress_calculator.calculate_progress(
+                    frame=_frame,
+                    time=_time,
+                )
 
                 if progress_handler:
                     await progress_handler(
                         CropScalerProgress(
-                            frame=frame,
-                            time=_time,
+                            frame=progress.frame,
+                            time=progress.time,
+                            internal_frame=progress.internal_frame,
+                            internal_time=progress.internal_time,
                         ),
                     )
 

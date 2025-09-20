@@ -4,10 +4,11 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from ..find_image import (
+from ..select_audio import (
     FfmpegProgressLine,
+    FfmpegSelectAudioResult,
+    ffmpeg_select_audio,
 )
-from ..select_audio import FfmpegSelectAudioResult, ffmpeg_select_audio
 
 
 def execute_select_audio_cli(

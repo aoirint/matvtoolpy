@@ -81,7 +81,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_crop_scale_cli(parser=parser_crop_scale)
 
     parser_find_image = subparsers.add_parser("find_image")
-    add_arguments_find_image_cli(parser=parser_find_image)
+    await add_arguments_find_image_cli(parser=parser_find_image)
 
     parser_audio = subparsers.add_parser("audio")
     add_arguments_audio_cli(parser=parser_audio)

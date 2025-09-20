@@ -6,7 +6,11 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from . import config
-from .find_image import FfmpegProgressLine
+
+
+class FfmpegProgressLine(BaseModel):
+    frame: int
+    time: str
 
 
 class FfmpegSliceResult(BaseModel):
