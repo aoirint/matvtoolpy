@@ -69,8 +69,6 @@ class ImageFinder:
         | None = None,
         result_handler: Callable[[ImageFinderResult], Awaitable[None]] | None = None,
     ) -> None:
-        # FPS
-        # TODO: モジュール化
         input_video_fps = await self._fps_parser.parse_fps(
             input_path=input_video_path,
         )
