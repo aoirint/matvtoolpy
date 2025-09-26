@@ -95,9 +95,10 @@ class ImageFinder:
         blackframe_amount: int = 98,
         blackframe_threshold: int = 32,
         output_interval: float = 0.0,
-        progress_handler: Callable[[ImageFinderProgress], Awaitable[None]]
-        | None = None,
-        result_handler: Callable[[ImageFinderResult], Awaitable[None]] | None = None,
+        progress_handler: (
+            Callable[[ImageFinderProgress], Awaitable[None]] | None
+        ) = None,
+        result_handler: (Callable[[ImageFinderResult], Awaitable[None]] | None) = None,
     ) -> None:
         input_video_fps = await self._fps_parser.parse_fps(
             input_path=input_video_path,
@@ -276,9 +277,9 @@ class ImageFinder:
                         ),
                     )
 
-        return_code = await wait_process(
+        returncode = await wait_process(
             process=proc,
             stderr_handler=_handle_stderr,
         )
-        if return_code != 0:
-            raise Exception(f"FFmpeg errored. code: {return_code}")
+        if returncode != 0:
+            raise Exception(f"FFmpeg errored. code: {returncode}")

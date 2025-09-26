@@ -7,22 +7,26 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from ..progress_handler.utility.progress_calculator import ProgressCalculator
-from ..util import exclude_none, parse_ffmpeg_time_unit_syntax
+from ..progress_handler.utility.progress_calculator import (
+    ProgressCalculator,
+)
+from ..util import (
+    parse_ffmpeg_time_unit_syntax,
+)
 from ..utility.async_subprocess_helper import wait_process
 from ..video_utility.fps_parser import FpsParser
 
 logger = getLogger(__name__)
 
 
-class CropScalerProgress(BaseModel):
+class AudioSelectorProgress(BaseModel):
     time: timedelta
     frame: int
     internal_time: timedelta
     internal_frame: int
 
 
-class CropScaler:
+class AudioSelector:
     def __init__(
         self,
         fps_parser: FpsParser,
@@ -31,15 +35,13 @@ class CropScaler:
         self._fps_parser = fps_parser
         self._ffmpeg_path = ffmpeg_path
 
-    async def crop_scale(
+    async def select_audio(
         self,
         input_path: Path,
-        crop: str | None,
-        scale: str | None,
-        video_codec: str | None,
+        audio_indexes: list[int],
         output_path: Path,
         progress_handler: (
-            Callable[[CropScalerProgress], Awaitable[None]] | None
+            Callable[[AudioSelectorProgress], Awaitable[None]] | None
         ) = None,
     ) -> None:
         input_video_fps = await self._fps_parser.parse_fps(
@@ -52,49 +54,30 @@ class CropScaler:
             internal_fps=input_video_fps,
         )
 
-        # TODO: quality control
-        if crop is not None and "," in crop:
-            raise ValueError("Invalid crop argument. Remove ',' from crop.")
+        audio_map_opts: list[str] = []
+        for audio_index in audio_indexes:
+            audio_map_opts.append("-map")
+            audio_map_opts.append(f"0:a:{audio_index}")
 
-        if scale is not None and "," in scale:
-            raise ValueError("Invalid scale argument. Remove ',' from scale.")
-
-        crop_filter_string = f"crop={crop}" if crop is not None else None
-        scale_filter_string = f"scale={scale}" if scale is not None else None
-
-        video_filters = list(
-            exclude_none(
-                [
-                    crop_filter_string,
-                    scale_filter_string,
-                ]
-            )
-        )
-        video_filter_opts = (
-            ["-filter:v", ",".join(video_filters)] if len(video_filters) != 0 else []
-        )
-
-        video_codec_opts = ["-c:v", video_codec] if video_codec is not None else []
-
+        # Command Argument List
         command = [
             self._ffmpeg_path,
             "-hide_banner",
             "-n",  # fail if already exists
             "-i",
             str(input_path),
-            *video_filter_opts,
-            *video_codec_opts,
-            "-c:a",
-            "copy",
             "-map",
-            "0",
+            "0:v:0",
+            *audio_map_opts,
             "-map_metadata",
             "0",
+            "-c",
+            "copy",
             str(output_path),
         ]
         proc = await asyncio.create_subprocess_exec(
             *command,
-            stdout=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.PIPE,
         )
 
@@ -114,7 +97,7 @@ class CropScaler:
 
                 if progress_handler:
                     await progress_handler(
-                        CropScalerProgress(
+                        AudioSelectorProgress(
                             frame=progress.frame,
                             time=progress.time,
                             internal_frame=progress.internal_frame,

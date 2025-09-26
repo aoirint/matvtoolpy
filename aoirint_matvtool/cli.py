@@ -71,7 +71,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_key_frames_cli(parser=parser_key_frames)
 
     parser_slice = subparsers.add_parser("slice")
-    add_arguments_slice_cli(parser=parser_slice)
+    await add_arguments_slice_cli(parser=parser_slice)
 
     parser_crop_scale = subparsers.add_parser("crop_scale")
     await add_arguments_crop_scale_cli(parser=parser_crop_scale)
@@ -83,7 +83,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_audio_cli(parser=parser_audio)
 
     parser_select_audio = subparsers.add_parser("select_audio")
-    add_arguments_select_audio_cli(parser=parser_select_audio)
+    await add_arguments_select_audio_cli(parser=parser_select_audio)
 
 
 async def main() -> None:
