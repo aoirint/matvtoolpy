@@ -30,7 +30,11 @@ class KeyFrameParser:
             "v",
             "-show_frames",
             "-show_entries",
-            "frame=pkt_pts_time",
+            # TODO: FFmpeg 5.0 未満のサポートを切るとき、 pkt_pts_time を削除する
+            # NOTE: 存在しないフィールドは列として出力されないため、FFmpeg 5.0 未満では2列目は pkt_pts_time、5.0 以上では pts_time になる  # noqa: E501
+            # NOTE: pkt_pts_time が削除されたコミット。release/5.0 ブランチには含まれているが、 release/4.4 ブランチには含まれていないので、5.0 での削除と判断  # noqa: E501
+            # https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/6e30b35b85b81c802e52a1078ec7a3097e353c6d
+            "frame=pkt_pts_time,pts_time",
             "-of",
             "csv",
             str(input_path),
