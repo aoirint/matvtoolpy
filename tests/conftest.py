@@ -9,6 +9,7 @@ from aoirint_matvtool.video_utility.crop_scaler import CropScaler
 from aoirint_matvtool.video_utility.fps_parser import FpsParser
 from aoirint_matvtool.video_utility.image_finder import ImageFinder
 from aoirint_matvtool.video_utility.key_frame_parser import KeyFrameParser
+from aoirint_matvtool.video_utility.video_slicer import VideoSlicer
 
 
 @pytest.fixture
@@ -79,4 +80,17 @@ def key_frame_parser(
     return KeyFrameParser(
         fps_parser=fps_parser,
         ffprobe_path=ffprobe_path,
+    )
+
+
+@pytest.fixture
+def video_slicer(
+    fps_parser: FpsParser,
+    key_frame_parser: KeyFrameParser,
+    ffmpeg_path: str,
+) -> VideoSlicer:
+    return VideoSlicer(
+        fps_parser=fps_parser,
+        key_frame_parser=key_frame_parser,
+        ffmpeg_path=ffmpeg_path,
     )
