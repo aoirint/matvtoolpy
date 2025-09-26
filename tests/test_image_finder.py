@@ -5,15 +5,6 @@ import pytest
 from aoirint_matvtool.video_utility.image_finder import ImageFinder, ImageFinderResult
 
 
-@pytest.fixture
-def image_finder(
-    ffmpeg_path: str,
-) -> ImageFinder:
-    return ImageFinder(
-        ffmpeg_path=ffmpeg_path,
-    )
-
-
 @pytest.mark.asyncio
 async def test_image_finder(
     image_finder: ImageFinder,

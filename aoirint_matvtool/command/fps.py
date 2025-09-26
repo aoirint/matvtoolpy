@@ -1,29 +1,36 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from ..fps import ffmpeg_fps
+from ..video_utility.fps_parser import FpsParser
 
 
-def execute_fps_cli(
+async def execute_fps_cli(
     input_path: Path,
+    ffprobe_path: str,
 ) -> None:
-    print(
-        ffmpeg_fps(
-            input_path=input_path,
-        ).fps
+    fps_parser = FpsParser(
+        ffprobe_path=ffprobe_path,
     )
 
-
-def handle_fps_cli(args: Namespace) -> None:
-    input_path_string: str = args.input_path
-    input_path = Path(input_path_string)
-
-    execute_fps_cli(
+    fps = await fps_parser.parse_fps(
         input_path=input_path,
     )
+    print(fps)
 
 
-def add_arguments_fps_cli(parser: ArgumentParser) -> None:
+async def handle_fps_cli(args: Namespace) -> None:
+    input_path_string: str = args.input_path
+    ffprobe_path: str = args.ffprobe_path
+
+    input_path = Path(input_path_string)
+
+    await execute_fps_cli(
+        input_path=input_path,
+        ffprobe_path=ffprobe_path,
+    )
+
+
+async def add_arguments_fps_cli(parser: ArgumentParser) -> None:
     parser.add_argument(
         "-i",
         "--input_path",

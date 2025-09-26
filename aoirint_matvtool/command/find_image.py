@@ -7,6 +7,7 @@ from ..progress_handler.base import ProgressHandler
 from ..progress_handler.plain import ProgressHandlerPlain
 from ..progress_handler.tqdm import ProgressHandlerTqdm
 from ..util import format_timedelta_as_time_unit_syntax_string
+from ..video_utility.fps_parser import FpsParser
 from ..video_utility.image_finder import (
     ImageFinder,
     ImageFinderProgress,
@@ -31,8 +32,14 @@ async def execute_find_image_cli(
     output_interval: float,
     progress_type: Literal["tqdm", "plain", "none"],
     ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> None:
+    fps_parser = FpsParser(
+        ffprobe_path=ffprobe_path,
+    )
+
     image_finder = ImageFinder(
+        fps_parser=fps_parser,
         ffmpeg_path=ffmpeg_path,
     )
 
@@ -102,6 +109,7 @@ async def handle_find_image_cli(args: Namespace) -> None:
     output_interval: float = args.output_interval
     progress_type: str = args.progress_type
     ffmpeg_path: str = args.ffmpeg_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_video_path = Path(input_video_path_string)
     reference_image_path = Path(reference_image_path_string)
@@ -122,6 +130,7 @@ async def handle_find_image_cli(args: Namespace) -> None:
         output_interval=output_interval,
         progress_type=progress_type,
         ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
