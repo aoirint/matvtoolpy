@@ -1,77 +1,84 @@
-import sys
 from argparse import ArgumentParser, Namespace
+from contextlib import AsyncExitStack
 from pathlib import Path
 
-from tqdm import tqdm
+from ..progress_handler.base import ProgressHandler
+from ..progress_handler.plain import ProgressHandlerPlain
+from ..progress_handler.tqdm import ProgressHandlerTqdm
+from ..video_utility.audio_selector import AudioSelector, AudioSelectorProgress
+from ..video_utility.fps_parser import FpsParser
+from ..video_utility.key_frame_parser import KeyFrameParser
 
-from ..select_audio import (
-    FfmpegProgressLine,
-    FfmpegSelectAudioResult,
-    ffmpeg_select_audio,
-)
 
-
-def execute_select_audio_cli(
+async def execute_select_audio_cli(
     input_path: Path,
     audio_indexes: list[int],
     output_path: Path,
     progress_type: str,
+    ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> None:
-    # tqdm
-    tqdm_pbar = None
-    if progress_type == "tqdm":
-        tqdm_pbar = tqdm()
+    fps_parser = FpsParser(
+        ffprobe_path=ffprobe_path,
+    )
 
-    try:
-        for output in ffmpeg_select_audio(
+    key_frame_parser = KeyFrameParser(
+        fps_parser=fps_parser,
+        ffprobe_path=ffprobe_path,
+    )
+
+    audio_selector = AudioSelector(
+        fps_parser=fps_parser,
+        key_frame_parser=key_frame_parser,
+        ffmpeg_path=ffmpeg_path,
+    )
+
+    async with AsyncExitStack() as stack:
+        progress_handler: ProgressHandler | None = None
+        if progress_type == "tqdm":
+            progress_handler = await stack.enter_async_context(ProgressHandlerTqdm())
+        elif progress_type == "plain":
+            progress_handler = await stack.enter_async_context(ProgressHandlerPlain())
+
+        async def _handle_progress(progress: AudioSelectorProgress) -> None:
+            if progress_handler is not None:
+                await progress_handler.handle_progress(
+                    frame=progress.frame,
+                    time=progress.time,
+                    internal_frame=progress.internal_frame,
+                    internal_time=progress.internal_time,
+                )
+
+        await audio_selector.select_audio(
             input_path=input_path,
             audio_indexes=audio_indexes,
             output_path=output_path,
-        ):
-            if isinstance(output, FfmpegProgressLine):
-                if tqdm_pbar is not None:
-                    tqdm_pbar.set_postfix(
-                        {
-                            "time": output.time,
-                            "frame": f"{output.frame}",
-                        }
-                    )
-                    tqdm_pbar.refresh()
-
-                if progress_type == "plain":
-                    print(
-                        f"Progress | Time {output.time}, frame {output.frame}",
-                        file=sys.stderr,
-                    )
-
-            if isinstance(output, FfmpegSelectAudioResult):
-                if tqdm_pbar is not None:
-                    tqdm_pbar.clear()
-
-                print(f"Output | {output}")
-    finally:
-        if tqdm_pbar is not None:
-            tqdm_pbar.close()
+            progress_handler=_handle_progress,
+        )
 
 
-def handle_select_audio_cli(args: Namespace) -> None:
+async def handle_select_audio_cli(args: Namespace) -> None:
     input_path_string: str = args.input_path
     audio_indexes: list[int] = args.audio_index
     output_path_string: str = args.output_path
     progress_type: str = args.progress_type
+    ffmpeg_path: str = args.ffmpeg_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
     output_path = Path(output_path_string)
 
-    execute_select_audio_cli(
+    await execute_select_audio_cli(
         input_path=input_path,
         audio_indexes=audio_indexes,
         output_path=output_path,
         progress_type=progress_type,
+        ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
-def add_arguments_select_audio_cli(parser: ArgumentParser) -> None:
+async def add_arguments_select_audio_cli(parser: ArgumentParser) -> None:
     parser.add_argument(
         "-i",
         "--input_path",

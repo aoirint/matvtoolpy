@@ -83,7 +83,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_audio_cli(parser=parser_audio)
 
     parser_select_audio = subparsers.add_parser("select_audio")
-    add_arguments_select_audio_cli(parser=parser_select_audio)
+    await add_arguments_select_audio_cli(parser=parser_select_audio)
 
 
 async def main() -> None:
