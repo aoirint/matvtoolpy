@@ -15,6 +15,9 @@ select = [
 [tool.mypy]
 strict = true
 
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
 [tool.uv]
 package = true
 
@@ -49,6 +52,7 @@ dev = [
     "opencv-python>=4.11.0.86",
     "pyinstaller>=6.16.0",
     "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
     "ruff>=0.13.0",
     "types-tqdm>=4.67.0.20250809",
 ]

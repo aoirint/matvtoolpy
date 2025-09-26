@@ -1,0 +1,29 @@
+from abc import ABC, abstractmethod
+from datetime import timedelta
+from types import TracebackType
+from typing import Self
+
+
+class ProgressHandler(ABC):
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> bool | None:
+        return None
+
+    @abstractmethod
+    async def handle_progress(
+        self,
+        frame: int,
+        time: timedelta,
+        internal_frame: int,
+        internal_time: timedelta,
+    ) -> None: ...
+
+    @abstractmethod
+    async def clear(self) -> None: ...

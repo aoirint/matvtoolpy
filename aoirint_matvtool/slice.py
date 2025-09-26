@@ -5,9 +5,12 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from aoirint_matvtool.find_image import FfmpegProgressLine
-
 from . import config
+
+
+class FfmpegProgressLine(BaseModel):
+    frame: int
+    time: str
 
 
 class FfmpegSliceResult(BaseModel):
