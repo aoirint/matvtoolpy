@@ -7,7 +7,6 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from ..fps import ffmpeg_fps
 from ..progress_handler.utility.progress_calculator import (
     ProgressCalculator,
 )
@@ -17,6 +16,7 @@ from ..util import (
     parse_ffmpeg_time_unit_syntax,
 )
 from ..utility.async_subprocess_helper import wait_process
+from ..video_utility.fps_parser import FpsParser
 
 logger = getLogger(__name__)
 
@@ -47,8 +47,10 @@ class ImageFinderResult(BaseModel):
 class ImageFinder:
     def __init__(
         self,
+        fps_parser: FpsParser,
         ffmpeg_path: str,
     ) -> None:
+        self._fps_parser = fps_parser
         self._ffmpeg_path = ffmpeg_path
 
     async def find_image(
@@ -69,9 +71,9 @@ class ImageFinder:
     ) -> None:
         # FPS
         # TODO: モジュール化
-        input_video_fps = ffmpeg_fps(input_path=input_video_path).fps
-        if not input_video_fps:
-            raise Exception("Failed to get FPS info from the input video.")
+        input_video_fps = await self._fps_parser.parse_fps(
+            input_path=input_video_path,
+        )
 
         start_timedelta = timedelta()
         if input_video_ss is not None:

@@ -7,10 +7,10 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from ..fps import ffmpeg_fps
 from ..progress_handler.utility.progress_calculator import ProgressCalculator
 from ..util import exclude_none, parse_ffmpeg_time_unit_syntax
 from ..utility.async_subprocess_helper import wait_process
+from ..video_utility.fps_parser import FpsParser
 
 logger = getLogger(__name__)
 
@@ -25,8 +25,10 @@ class CropScalerProgress(BaseModel):
 class CropScaler:
     def __init__(
         self,
+        fps_parser: FpsParser,
         ffmpeg_path: str,
     ) -> None:
+        self._fps_parser = fps_parser
         self._ffmpeg_path = ffmpeg_path
 
     async def crop_scale(
@@ -38,11 +40,9 @@ class CropScaler:
         output_path: Path,
         progress_handler: Callable[[CropScalerProgress], Awaitable[None]] | None = None,
     ) -> None:
-        # FPS
-        # TODO: モジュール化
-        input_video_fps = ffmpeg_fps(input_path=input_path).fps
-        if not input_video_fps:
-            raise Exception("Failed to get FPS info from the input video.")
+        input_video_fps = await self._fps_parser.parse_fps(
+            input_path=input_path,
+        )
 
         progress_calculator = ProgressCalculator(
             start_timedelta=timedelta(),

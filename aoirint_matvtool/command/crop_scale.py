@@ -10,6 +10,7 @@ from ..video_utility.crop_scaler import (
     CropScaler,
     CropScalerProgress,
 )
+from ..video_utility.fps_parser import FpsParser
 
 
 def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "none"]]:
@@ -24,8 +25,14 @@ async def execute_crop_scale_cli(
     video_codec: str | None,
     progress_type: Literal["tqdm", "plain", "none"],
     ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> None:
+    fps_parser = FpsParser(
+        ffprobe_path=ffprobe_path,
+    )
+
     crop_scaler = CropScaler(
+        fps_parser=fps_parser,
         ffmpeg_path=ffmpeg_path,
     )
 
@@ -67,6 +74,7 @@ async def handle_crop_scale_cli(args: Namespace) -> None:
     video_codec: str | None = args.video_codec
     progress_type: str = args.progress_type
     ffmpeg_path: str = args.ffmpeg_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
     output_path = Path(output_path_string)
@@ -82,6 +90,7 @@ async def handle_crop_scale_cli(args: Namespace) -> None:
         video_codec=video_codec,
         progress_type=progress_type,
         ffmpeg_path=ffmpeg_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
