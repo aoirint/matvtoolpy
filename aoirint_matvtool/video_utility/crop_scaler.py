@@ -38,7 +38,9 @@ class CropScaler:
         scale: str | None,
         video_codec: str | None,
         output_path: Path,
-        progress_handler: Callable[[CropScalerProgress], Awaitable[None]] | None = None,
+        progress_handler: (
+            Callable[[CropScalerProgress], Awaitable[None]] | None
+        ) = None,
     ) -> None:
         input_video_fps = await self._fps_parser.parse_fps(
             input_path=input_path,

@@ -44,8 +44,9 @@ class VideoSlicer:
         to: str,
         input_path: Path,
         output_path: Path,
-        progress_handler: Callable[[VideoSlicerProgress], Awaitable[None]]
-        | None = None,
+        progress_handler: (
+            Callable[[VideoSlicerProgress], Awaitable[None]] | None
+        ) = None,
     ) -> None:
         input_video_fps = await self._fps_parser.parse_fps(
             input_path=input_path,
