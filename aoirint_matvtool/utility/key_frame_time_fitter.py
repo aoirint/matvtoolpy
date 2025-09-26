@@ -21,7 +21,7 @@ class KeyFrameTimeFitter:
         指定した時間に最も近く、指定した時間より前にあるキーフレームの時間を返す
         """
 
-        key_frames = await self._key_frame_parser.parse_key_frame_times(
+        key_frames = await self._key_frame_parser.parse_key_frames(
             input_path=video_path,
         )
 

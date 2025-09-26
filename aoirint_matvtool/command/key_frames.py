@@ -20,11 +20,11 @@ async def execute_key_frames_cli(
         ffprobe_path=ffprobe_path,
     )
 
-    key_frame_times = await key_frame_parser.parse_key_frame_times(
+    key_frames = await key_frame_parser.parse_key_frames(
         input_path=input_path,
     )
-    for time in key_frame_times:
-        print(f"{time.total_seconds():.06f}")
+    for key_frame in key_frames:
+        print(f"{key_frame.total_seconds():.06f}")
 
 
 async def handle_key_frames_cli(args: Namespace) -> None:

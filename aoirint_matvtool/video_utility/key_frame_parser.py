@@ -17,7 +17,7 @@ class KeyFrameParser:
         self._fps_parser = fps_parser
         self._ffprobe_path = ffprobe_path
 
-    async def parse_key_frame_times(
+    async def parse_key_frames(
         self,
         input_path: Path,
     ) -> list[timedelta]:
@@ -53,7 +53,7 @@ class KeyFrameParser:
 
         stdout_lines = stdout.strip().splitlines()
 
-        key_frame_times: list[timedelta] = []
+        key_frames: list[timedelta] = []
         for line in stdout_lines:
             line = line.strip()
             if not line:
@@ -80,7 +80,7 @@ class KeyFrameParser:
 
             seconds = float(seconds_string)
 
-            time = timedelta(seconds=seconds)
-            key_frame_times.append(time)
+            key_frame = timedelta(seconds=seconds)
+            key_frames.append(key_frame)
 
-        return key_frame_times
+        return key_frames

@@ -12,7 +12,7 @@ async def test_key_frame_parser(
 ) -> None:
     input_file = fixture_dir / "sample1.mkv"
 
-    key_frames = await key_frame_parser.parse_key_frame_times(
+    key_frames = await key_frame_parser.parse_key_frames(
         input_path=input_file,
     )
     assert len(key_frames) == 4
