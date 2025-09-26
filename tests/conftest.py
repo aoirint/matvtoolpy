@@ -44,8 +44,8 @@ def crop_scaler(
 
 @pytest.fixture
 def image_finder(
-    ffmpeg_path: str,
     fps_parser: FpsParser,
+    ffmpeg_path: str,
 ) -> ImageFinder:
     return ImageFinder(
         fps_parser=fps_parser,
