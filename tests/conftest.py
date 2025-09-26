@@ -69,3 +69,14 @@ def audio_track_title_parser(
     return AudioTrackTitleParser(
         ffprobe_path=ffprobe_path,
     )
+
+
+@pytest.fixture
+def key_frame_parser(
+    fps_parser: FpsParser,
+    ffprobe_path: str,
+) -> KeyFrameParser:
+    return KeyFrameParser(
+        fps_parser=fps_parser,
+        ffprobe_path=ffprobe_path,
+    )
