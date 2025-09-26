@@ -107,9 +107,9 @@ class VideoSlicer:
                         ),
                     )
 
-        return_code = await wait_process(
+        returncode = await wait_process(
             process=proc,
             stderr_handler=_handle_stderr,
         )
-        if return_code != 0:
-            raise Exception(f"FFmpeg errored. code: {return_code}")
+        if returncode != 0:
+            raise Exception(f"FFmpeg errored. code: {returncode}")
