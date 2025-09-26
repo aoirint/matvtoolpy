@@ -23,9 +23,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     UV_PROJECT_ENVIRONMENT="/opt/python_venv" uv sync --locked --no-dev --no-editable --no-install-project
 EOF
 
-# アプリケーションのソースコードを追加
-COPY ./aoirint_matvtool /opt/aoirint_matvtool/aoirint_matvtool
-
 # Python仮想環境にPATHを通す
 ENV PATH="/opt/python_venv/bin:${PATH}"
 
