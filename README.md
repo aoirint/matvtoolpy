@@ -7,7 +7,7 @@ A command line tool to handle a multi audio track video file.
 ## インストール
 
 基本的にFFmpegのラッパーです。別途FFmpegのインストールが必要です。
-FFmpeg 4.4（Ubuntu 22.04の標準バージョン）をサポートしています。
+FFmpeg 4.4（Ubuntu 22.04の標準バージョン）、6.1（Ubuntu 24.04の標準バージョン）、7.1（Debian 13の標準バージョン）をサポートしています。
 
 - <https://ffmpeg.org/download.html>
 
