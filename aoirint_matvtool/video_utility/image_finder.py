@@ -12,11 +12,12 @@ from ..progress_handler.utility.progress_calculator import (
 )
 from ..util import (
     exclude_none,
-    get_real_start_timedelta_by_ss,
     parse_ffmpeg_time_unit_syntax,
 )
 from ..utility.async_subprocess_helper import wait_process
+from ..utility.key_frame_time_fitter import KeyFrameTimeFitter
 from ..video_utility.fps_parser import FpsParser
+from .key_frame_parser import KeyFrameParser
 
 logger = getLogger(__name__)
 
@@ -48,10 +49,39 @@ class ImageFinder:
     def __init__(
         self,
         fps_parser: FpsParser,
+        key_frame_parser: KeyFrameParser,
         ffmpeg_path: str,
     ) -> None:
         self._fps_parser = fps_parser
+        self._key_frame_parser = key_frame_parser
         self._ffmpeg_path = ffmpeg_path
+
+    async def _parse_start_timedelta_from_ss(
+        self,
+        input_video_path: Path,
+        input_video_ss: str | None,
+    ) -> timedelta:
+        raw_start_time = (
+            parse_ffmpeg_time_unit_syntax(input_video_ss)
+            if input_video_ss is not None
+            else None
+        )
+        raw_start_timedelta = (
+            raw_start_time.to_timedelta()
+            if raw_start_time is not None
+            else timedelta(seconds=0)
+        )
+
+        key_frame_time_fitter = KeyFrameTimeFitter(
+            key_frame_parser=self._key_frame_parser,
+        )
+
+        start_timedelta = await key_frame_time_fitter.fit_time(
+            video_path=input_video_path,
+            time=raw_start_timedelta,
+        )
+
+        return start_timedelta
 
     async def find_image(
         self,
@@ -73,12 +103,10 @@ class ImageFinder:
             input_path=input_video_path,
         )
 
-        start_timedelta = timedelta()
-        if input_video_ss is not None:
-            start_timedelta = get_real_start_timedelta_by_ss(
-                video_path=input_video_path,
-                ss=input_video_ss,
-            )
+        start_timedelta = await self._parse_start_timedelta_from_ss(
+            input_video_path=input_video_path,
+            input_video_ss=input_video_ss,
+        )
 
         progress_calculator = ProgressCalculator(
             start_timedelta=start_timedelta,

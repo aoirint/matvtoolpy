@@ -8,6 +8,7 @@ from aoirint_matvtool.video_utility.audio_track_title_parser import (
 from aoirint_matvtool.video_utility.crop_scaler import CropScaler
 from aoirint_matvtool.video_utility.fps_parser import FpsParser
 from aoirint_matvtool.video_utility.image_finder import ImageFinder
+from aoirint_matvtool.video_utility.key_frame_parser import KeyFrameParser
 
 
 @pytest.fixture
@@ -49,9 +50,14 @@ def crop_scaler(
 def image_finder(
     fps_parser: FpsParser,
     ffmpeg_path: str,
+    ffprobe_path: str,
 ) -> ImageFinder:
     return ImageFinder(
         fps_parser=fps_parser,
+        key_frame_parser=KeyFrameParser(
+            fps_parser=fps_parser,
+            ffprobe_path=ffprobe_path,
+        ),
         ffmpeg_path=ffmpeg_path,
     )
 

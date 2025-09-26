@@ -2,12 +2,9 @@ import re
 from collections.abc import Iterable
 from datetime import timedelta
 from math import log10
-from pathlib import Path
 from typing import TypeVar
 
 from pydantic import BaseModel
-
-from .key_frames import FfmpegKeyFrameOutputLine, ffmpeg_key_frames
 
 T = TypeVar("T")
 
@@ -92,38 +89,6 @@ def parse_ffmpeg_time_unit_syntax(string: str) -> FfmpegTimeUnitSyntax:
         )
 
     raise ValueError(f"Unsupported syntax: {string}")
-
-
-def get_real_start_timedelta_by_ss(
-    video_path: Path,
-    ss: str | None,
-) -> timedelta:
-    """
-    ssオプションから実時間での開始時間を計算
-    """
-    raw_start_time = parse_ffmpeg_time_unit_syntax(ss) if ss is not None else None
-    raw_start_timedelta = (
-        raw_start_time.to_timedelta()
-        if raw_start_time is not None
-        else timedelta(seconds=0)
-    )
-    # raw_end_time = parse_ffmpeg_time_unit_syntax(to) if to is not None else None
-
-    # キーフレーム情報をもとにstart_timedeltaを補正
-    start_timedelta = timedelta(seconds=0)
-    for output in ffmpeg_key_frames(
-        input_path=video_path,
-    ):
-        if isinstance(output, FfmpegKeyFrameOutputLine):
-            next_key_frame_timedelta = timedelta(seconds=output.time)
-
-            # raw_start_timedeltaより前のキーフレームを選択（-ssオプションの挙動）
-            if raw_start_timedelta <= next_key_frame_timedelta:
-                break
-
-            start_timedelta = next_key_frame_timedelta
-
-    return start_timedelta
 
 
 def format_timedelta_as_time_unit_syntax_string(td: timedelta) -> str:

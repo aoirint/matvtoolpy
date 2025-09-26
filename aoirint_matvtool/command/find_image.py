@@ -13,6 +13,7 @@ from ..video_utility.image_finder import (
     ImageFinderProgress,
     ImageFinderResult,
 )
+from ..video_utility.key_frame_parser import KeyFrameParser
 
 
 def validate_progress_type(value: Any) -> TypeGuard[Literal["tqdm", "plain", "none"]]:
@@ -38,8 +39,14 @@ async def execute_find_image_cli(
         ffprobe_path=ffprobe_path,
     )
 
+    key_frame_parser = KeyFrameParser(
+        fps_parser=fps_parser,
+        ffprobe_path=ffprobe_path,
+    )
+
     image_finder = ImageFinder(
         fps_parser=fps_parser,
+        key_frame_parser=key_frame_parser,
         ffmpeg_path=ffmpeg_path,
     )
 

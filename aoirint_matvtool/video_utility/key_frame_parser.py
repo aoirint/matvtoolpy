@@ -17,7 +17,7 @@ class KeyFrameParser:
         self._fps_parser = fps_parser
         self._ffprobe_path = ffprobe_path
 
-    async def parse_key_frame_seconds(
+    async def parse_key_frame_times(
         self,
         input_path: Path,
     ) -> list[timedelta]:
