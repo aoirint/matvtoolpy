@@ -19,8 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # TODO: Ubuntu 24.04を追加
           - os: 'ubuntu-22.04'
+          - os: 'ubuntu-24.04'
 
     runs-on: ${{ matrix.os }}
 
