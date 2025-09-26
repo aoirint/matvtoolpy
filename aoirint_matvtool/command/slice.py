@@ -7,7 +7,6 @@ from ..progress_handler.base import ProgressHandler
 from ..progress_handler.plain import ProgressHandlerPlain
 from ..progress_handler.tqdm import ProgressHandlerTqdm
 from ..video_utility.fps_parser import FpsParser
-from ..video_utility.key_frame_parser import KeyFrameParser
 from ..video_utility.video_slicer import VideoSlicer, VideoSlicerProgress
 
 
@@ -28,14 +27,8 @@ async def execute_slice_cli(
         ffprobe_path=ffprobe_path,
     )
 
-    key_frame_parser = KeyFrameParser(
-        fps_parser=fps_parser,
-        ffprobe_path=ffprobe_path,
-    )
-
     video_slicer = VideoSlicer(
         fps_parser=fps_parser,
-        key_frame_parser=key_frame_parser,
         ffmpeg_path=ffmpeg_path,
     )
 

@@ -87,12 +87,10 @@ def key_frame_parser(
 @pytest.fixture
 def video_slicer(
     fps_parser: FpsParser,
-    key_frame_parser: KeyFrameParser,
     ffmpeg_path: str,
 ) -> VideoSlicer:
     return VideoSlicer(
         fps_parser=fps_parser,
-        key_frame_parser=key_frame_parser,
         ffmpeg_path=ffmpeg_path,
     )
 
