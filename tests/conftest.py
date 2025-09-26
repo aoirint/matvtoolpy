@@ -2,6 +2,9 @@ from pathlib import Path
 
 import pytest
 
+from aoirint_matvtool.video_utility.audio_track_title_parser import (
+    AudioTrackTitleParser,
+)
 from aoirint_matvtool.video_utility.crop_scaler import CropScaler
 from aoirint_matvtool.video_utility.fps_parser import FpsParser
 from aoirint_matvtool.video_utility.image_finder import ImageFinder
@@ -50,4 +53,13 @@ def image_finder(
     return ImageFinder(
         fps_parser=fps_parser,
         ffmpeg_path=ffmpeg_path,
+    )
+
+
+@pytest.fixture
+def audio_track_title_parser(
+    ffprobe_path: str,
+) -> AudioTrackTitleParser:
+    return AudioTrackTitleParser(
+        ffprobe_path=ffprobe_path,
     )
