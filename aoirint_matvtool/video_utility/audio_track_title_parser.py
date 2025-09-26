@@ -4,8 +4,12 @@ from pathlib import Path
 from pydantic import BaseModel
 
 
+class _FfprobeStreamTags(BaseModel):
+    title: str | None = None
+
+
 class _FfprobeStream(BaseModel):
-    tags: dict[str, str] | None = None
+    tags: _FfprobeStreamTags | None = None
 
 
 class _FfprobeOutput(BaseModel):
@@ -47,8 +51,8 @@ class AudioTrackTitleParser:
         ret_titles: list[str | None] = []
         for stream in ffprobe_output.streams:
             title: str | None = None
-            if stream.tags and "title" in stream.tags:
-                title = stream.tags["title"]
+            if stream.tags:
+                title = stream.tags.title
 
             ret_titles.append(title)
 
