@@ -15,7 +15,6 @@ from ..util import (
 )
 from ..utility.async_subprocess_helper import wait_process
 from ..video_utility.fps_parser import FpsParser
-from .key_frame_parser import KeyFrameParser
 
 logger = getLogger(__name__)
 
@@ -31,11 +30,9 @@ class VideoSlicer:
     def __init__(
         self,
         fps_parser: FpsParser,
-        key_frame_parser: KeyFrameParser,
         ffmpeg_path: str,
     ) -> None:
         self._fps_parser = fps_parser
-        self._key_frame_parser = key_frame_parser
         self._ffmpeg_path = ffmpeg_path
 
     async def slice_video(
