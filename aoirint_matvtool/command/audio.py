@@ -1,43 +1,39 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from ..inputs import ffmpeg_get_input
+from ..video_utility.audio_track_title_parser import AudioTrackTitleParser
 
 
-def execute_audio_cli(
+async def execute_audio_cli(
     input_path: Path,
+    ffprobe_path: str,
 ) -> None:
-    inp = ffmpeg_get_input(
+    title_parser = AudioTrackTitleParser(
+        ffprobe_path=ffprobe_path,
+    )
+
+    titles = await title_parser.parse_titles(
         input_path=input_path,
     )
 
-    assert len(inp.streams) != 0
-    stream = inp.streams[0]
-
-    for track in stream.tracks:
-        if track.type == "Audio":
-            metadata_title = next(
-                filter(
-                    lambda metadata: metadata.key.lower() == "title", track.metadatas
-                ),
-                None,
-            )
-            title = metadata_title.value if metadata_title else ""
-
-            print(f"Audio Track {track.index}: {title}")
+    for index, title in enumerate(titles):
+        title = title or ""
+        print(f"Audio Track {index}: {title}")
 
 
-def handle_audio_cli(args: Namespace) -> None:
+async def handle_audio_cli(args: Namespace) -> None:
     input_path_string: str = args.input_path
+    ffprobe_path: str = args.ffprobe_path
 
     input_path = Path(input_path_string)
 
-    execute_audio_cli(
+    await execute_audio_cli(
         input_path=input_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
-def add_arguments_audio_cli(parser: ArgumentParser) -> None:
+async def add_arguments_audio_cli(parser: ArgumentParser) -> None:
     parser.add_argument(
         "-i",
         "--input_path",
