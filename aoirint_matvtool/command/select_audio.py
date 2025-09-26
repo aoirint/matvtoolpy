@@ -7,7 +7,6 @@ from ..progress_handler.plain import ProgressHandlerPlain
 from ..progress_handler.tqdm import ProgressHandlerTqdm
 from ..video_utility.audio_selector import AudioSelector, AudioSelectorProgress
 from ..video_utility.fps_parser import FpsParser
-from ..video_utility.key_frame_parser import KeyFrameParser
 
 
 async def execute_select_audio_cli(
@@ -22,14 +21,8 @@ async def execute_select_audio_cli(
         ffprobe_path=ffprobe_path,
     )
 
-    key_frame_parser = KeyFrameParser(
-        fps_parser=fps_parser,
-        ffprobe_path=ffprobe_path,
-    )
-
     audio_selector = AudioSelector(
         fps_parser=fps_parser,
-        key_frame_parser=key_frame_parser,
         ffmpeg_path=ffmpeg_path,
     )
 

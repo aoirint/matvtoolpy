@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from aoirint_matvtool.video_utility.audio_selector import AudioSelector
 from aoirint_matvtool.video_utility.audio_track_title_parser import (
     AudioTrackTitleParser,
 )
@@ -92,5 +93,16 @@ def video_slicer(
     return VideoSlicer(
         fps_parser=fps_parser,
         key_frame_parser=key_frame_parser,
+        ffmpeg_path=ffmpeg_path,
+    )
+
+
+@pytest.fixture
+def audio_selector(
+    fps_parser: FpsParser,
+    ffmpeg_path: str,
+) -> AudioSelector:
+    return AudioSelector(
+        fps_parser=fps_parser,
         ffmpeg_path=ffmpeg_path,
     )
