@@ -46,6 +46,9 @@ class FpsParser:
         )
         stdout_bytes, _ = await proc.communicate()
 
+        if proc.returncode != 0:
+            raise Exception(f"FFprobe errored. code: {proc.returncode}")
+
         stdout = stdout_bytes.decode("utf-8")
         ffprobe_output = _FfprobeOutput.model_validate_json(stdout)
 
