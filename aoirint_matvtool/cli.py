@@ -8,7 +8,6 @@ from .command.audio import add_arguments_audio_cli
 from .command.crop_scale import add_arguments_crop_scale_cli
 from .command.find_image import add_arguments_find_image_cli
 from .command.fps import add_arguments_fps_cli
-from .command.input import add_arguments_input_cli
 from .command.key_frames import add_arguments_key_frames_cli
 from .command.select_audio import add_arguments_select_audio_cli
 from .command.slice import add_arguments_slice_cli
@@ -64,9 +63,6 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     parser.add_argument("--ffprobe_path", type=str, default=config.FFPROBE_PATH)
 
     subparsers = parser.add_subparsers()
-
-    parser_input = subparsers.add_parser("input")
-    add_arguments_input_cli(parser=parser_input)
 
     parser_fps = subparsers.add_parser("fps")
     await add_arguments_fps_cli(parser=parser_fps)
