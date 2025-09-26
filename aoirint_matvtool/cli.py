@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from argparse import ArgumentParser, Namespace
 from asyncio import iscoroutinefunction
@@ -86,7 +87,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_select_audio_cli(parser=parser_select_audio)
 
 
-async def main() -> None:
+async def main_async() -> None:
     parser = ArgumentParser()
     await add_arguments_main_cli(parser=parser)
 
@@ -95,3 +96,7 @@ async def main() -> None:
         parser=parser,
         args=args,
     )
+
+
+def main() -> None:
+    asyncio.run(main_async())
