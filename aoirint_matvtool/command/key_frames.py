@@ -1,30 +1,45 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from ..key_frames import (
-    ffmpeg_key_frames,
+from ..video_utility.fps_parser import FpsParser
+from ..video_utility.key_frame_parser import (
+    KeyFrameParser,
 )
 
 
-def execute_key_frames_cli(
+async def execute_key_frames_cli(
     input_path: Path,
+    ffprobe_path: str,
 ) -> None:
-    for output in ffmpeg_key_frames(
+    fps_parser = FpsParser(
+        ffprobe_path=ffprobe_path,
+    )
+
+    key_frame_parser = KeyFrameParser(
+        fps_parser=fps_parser,
+        ffprobe_path=ffprobe_path,
+    )
+
+    key_frame_times = await key_frame_parser.parse_key_frame_times(
         input_path=input_path,
-    ):
-        print(f"{output.time:.06f}")
+    )
+    for time in key_frame_times:
+        print(f"{time.total_seconds():.06f}")
 
 
-def handle_key_frames_cli(args: Namespace) -> None:
+async def handle_key_frames_cli(args: Namespace) -> None:
     input_path_string: str = args.input_path
+    ffprobe_path: str = args.ffprobe_path
+
     input_path = Path(input_path_string)
 
-    execute_key_frames_cli(
+    await execute_key_frames_cli(
         input_path=input_path,
+        ffprobe_path=ffprobe_path,
     )
 
 
-def add_arguments_key_frames_cli(parser: ArgumentParser) -> None:
+async def add_arguments_key_frames_cli(parser: ArgumentParser) -> None:
     parser.add_argument(
         "-i",
         "--input_path",

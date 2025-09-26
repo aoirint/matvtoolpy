@@ -68,7 +68,7 @@ async def add_arguments_main_cli(parser: ArgumentParser) -> None:
     await add_arguments_fps_cli(parser=parser_fps)
 
     parser_key_frames = subparsers.add_parser("key_frames")
-    add_arguments_key_frames_cli(parser=parser_key_frames)
+    await add_arguments_key_frames_cli(parser=parser_key_frames)
 
     parser_slice = subparsers.add_parser("slice")
     add_arguments_slice_cli(parser=parser_slice)

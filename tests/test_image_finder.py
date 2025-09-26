@@ -9,7 +9,6 @@ from aoirint_matvtool.video_utility.image_finder import ImageFinder, ImageFinder
 async def test_image_finder(
     image_finder: ImageFinder,
     fixture_dir: Path,
-    tmp_path: Path,
 ) -> None:
     input_file = fixture_dir / "sample1.mkv"
     reference_file = fixture_dir / "sample2.jpg"
