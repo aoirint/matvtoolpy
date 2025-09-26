@@ -1,14 +1,11 @@
 import asyncio
 from pathlib import Path
-from typing import Literal
 
 from pydantic import BaseModel
 
 
 class _FfprobeStream(BaseModel):
-    index: int
-    codec_type: Literal["audio"]
-    tags: dict[str, str] | None
+    tags: dict[str, str] | None = None
 
 
 class _FfprobeOutput(BaseModel):
